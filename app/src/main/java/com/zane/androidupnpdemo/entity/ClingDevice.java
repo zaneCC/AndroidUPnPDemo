@@ -1,8 +1,6 @@
 package com.zane.androidupnpdemo.entity;
 
-import org.fourthline.cling.model.ValidationException;
 import org.fourthline.cling.model.meta.Device;
-import org.fourthline.cling.model.meta.DeviceIdentity;
 
 /**
  * 说明：
@@ -10,9 +8,8 @@ import org.fourthline.cling.model.meta.DeviceIdentity;
  * 日期：17/6/27 17:47
  */
 
-public abstract class ClingDevice extends Device {
+public class ClingDevice  implements IDevice {
 
-    public ClingDevice(DeviceIdentity identity) throws ValidationException {
-        super(identity);
-    }
+    public Device device;
+
 }

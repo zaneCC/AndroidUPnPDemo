@@ -23,7 +23,7 @@ public interface IUpnpServiceManager {
      *
      * @return  设备列表
      */
-    Collection<IDevice> getDmrDevices();
+    Collection<? extends IDevice> getDmrDevices();
 
     /**
      * 获取控制点
@@ -39,4 +39,8 @@ public interface IUpnpServiceManager {
      */
     IDevice getSelectedDevice();
 
+    /**
+     * 销毁
+     */
+    void destroy();
 }

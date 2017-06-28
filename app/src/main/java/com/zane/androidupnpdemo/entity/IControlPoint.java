@@ -6,5 +6,5 @@ package com.zane.androidupnpdemo.entity;
  * 日期：17/6/27 17:47
  */
 
-public class IControlPoint {
+public interface IControlPoint {
 }
