@@ -8,10 +8,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.zane.androidupnpdemo.ClingUpnpServiceManager;
+import com.zane.androidupnpdemo.service.manager.ClingUpnpServiceManager;
 import com.zane.androidupnpdemo.R;
 import com.zane.androidupnpdemo.entity.ClingDevice;
 import com.zane.androidupnpdemo.entity.IDevice;
@@ -22,6 +23,7 @@ import java.util.Collection;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     private Context mContext;
 
     private ListView mDeviceList;
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private ServiceConnection mUpnpServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
+            Log.e(TAG, "mUpnpServiceConnection onServiceConnected");
+
             ClingUpnpService.LocalBinder binder = (ClingUpnpService.LocalBinder) service;
             ClingUpnpService beyondUpnpService = binder.getService();
 
@@ -42,6 +46,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         @Override
         public void onServiceDisconnected(ComponentName className) {
+            Log.e(TAG, "mUpnpServiceConnection onServiceDisconnected");
+
             ClingUpnpServiceManager.getInstance().setUpnpService(null);
         }
     };
@@ -49,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private ServiceConnection mSystemServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
+            Log.e(TAG, "mSystemServiceConnection onServiceConnected");
+
             SystemService.LocalBinder systemServiceBinder = (SystemService.LocalBinder) service;
             //Set binder to SystemManager
             ClingUpnpServiceManager clingUpnpServiceManager = ClingUpnpServiceManager.getInstance();
@@ -57,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         @Override
         public void onServiceDisconnected(ComponentName className) {
+            Log.e(TAG, "mSystemServiceConnection onServiceDisconnected");
+
             ClingUpnpServiceManager.getInstance().setSystemService(null);
         }
     };
@@ -71,13 +81,14 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         bindServices();
     }
 
+
     private void bindServices() {
         // Bind UPnP service
         Intent upnpServiceIntent = new Intent(MainActivity.this, ClingUpnpService.class);
         bindService(upnpServiceIntent, mUpnpServiceConnection, Context.BIND_AUTO_CREATE);
         // Bind System service
-        Intent systemServiceIntent = new Intent(MainActivity.this, SystemService.class);
-        bindService(systemServiceIntent, mSystemServiceConnection, Context.BIND_AUTO_CREATE);
+//        Intent systemServiceIntent = new Intent(MainActivity.this, SystemService.class);
+//        bindService(systemServiceIntent, mSystemServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -86,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         // Unbind UPnP service
         unbindService(mUpnpServiceConnection);
         // Unbind System service
-        unbindService(mSystemServiceConnection);
+//        unbindService(mSystemServiceConnection);
 
         ClingUpnpServiceManager.getInstance().destroy();
     }
@@ -113,7 +124,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private void refreshDeviceList() {
         Collection<? extends IDevice> devices = ClingUpnpServiceManager.getInstance().getDmrDevices();
-        mDevicesAdapter.clear();
-        mDevicesAdapter.addAll((Collection<? extends ClingDevice>) devices);
+        if (devices != null){
+            mDevicesAdapter.clear();
+            mDevicesAdapter.addAll((Collection<? extends ClingDevice>) devices);
+        }
     }
 }

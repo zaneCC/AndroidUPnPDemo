@@ -1,4 +1,4 @@
-package com.zane.androidupnpdemo;
+package com.zane.androidupnpdemo.service.manager;
 
 import android.support.annotation.Nullable;
 
@@ -9,6 +9,7 @@ import com.zane.androidupnpdemo.entity.IDevice;
 import com.zane.androidupnpdemo.service.ClingUpnpService;
 import com.zane.androidupnpdemo.service.SystemService;
 import com.zane.androidupnpdemo.util.ListUtils;
+import com.zane.androidupnpdemo.util.Utils;
 
 import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.types.DeviceType;
@@ -41,7 +42,7 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
     }
 
     public static ClingUpnpServiceManager getInstance() {
-        if (INSTANCE == null) {
+        if (Utils.isNull(INSTANCE)) {
             INSTANCE = new ClingUpnpServiceManager();
         }
         return INSTANCE;
@@ -50,7 +51,7 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
 
     @Override
     public void searchDevices() {
-        if (null != mUpnpService) {
+        if (!Utils.isNull(mUpnpService)) {
             mUpnpService.getControlPoint().search();
         }
     }
@@ -58,6 +59,9 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
     @Override
     @Nullable
     public Collection<ClingDevice> getDmrDevices() {
+        if (Utils.isNull(mUpnpService))
+            return null;
+
         Collection<Device> devices = mUpnpService.getRegistry().getDevices(dmrDeviceType);
         if (ListUtils.isEmpty(devices)) {
             return null;
@@ -74,7 +78,7 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
 
     @Override
     public IControlPoint getControlPoint() {
-        if (mUpnpService == null)
+        if (Utils.isNull(mUpnpService))
             return null;
         ClingControlPoint.getInstance().controlPoint = mUpnpService.getControlPoint();
 

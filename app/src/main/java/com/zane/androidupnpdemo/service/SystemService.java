@@ -22,8 +22,8 @@ import android.os.IBinder;
 import android.util.Log;
 
 
-import com.zane.androidupnpdemo.ClingUpnpServiceManager;
 import com.zane.androidupnpdemo.Intents;
+import com.zane.androidupnpdemo.service.manager.ClingUpnpServiceManager;
 
 import org.fourthline.cling.controlpoint.ControlPoint;
 import org.fourthline.cling.controlpoint.SubscriptionCallback;

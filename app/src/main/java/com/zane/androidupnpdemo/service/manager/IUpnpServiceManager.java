@@ -1,4 +1,4 @@
-package com.zane.androidupnpdemo;
+package com.zane.androidupnpdemo.service.manager;
 
 import com.zane.androidupnpdemo.entity.IControlPoint;
 import com.zane.androidupnpdemo.entity.IDevice;
