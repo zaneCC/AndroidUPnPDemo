@@ -16,6 +16,7 @@ import org.fourthline.cling.model.types.DeviceType;
 import org.fourthline.cling.model.types.ServiceType;
 import org.fourthline.cling.model.types.UDADeviceType;
 import org.fourthline.cling.model.types.UDAServiceType;
+import org.fourthline.cling.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +32,7 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
     public static final ServiceType CONTENT_DIRECTORY_SERVICE = new UDAServiceType("ContentDirectory");
     public static final ServiceType AV_TRANSPORT_SERVICE = new UDAServiceType("AVTransport");
     public static final ServiceType RENDERING_CONTROL_SERVICE = new UDAServiceType("RenderingControl");
-    private DeviceType dmrDeviceType = new UDADeviceType("MediaRenderer");
+    public static final DeviceType dmrDeviceType = new UDADeviceType("MediaRenderer");
 
     private static ClingUpnpServiceManager INSTANCE = null;
     //Service
@@ -69,8 +70,7 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
 
         Collection<ClingDevice> clingDevices = new ArrayList<>();
         for (Device device : devices) {
-            ClingDevice clingDevice = new ClingDevice();
-            clingDevice.device = device;
+            ClingDevice clingDevice = new ClingDevice(device);
             clingDevices.add(clingDevice);
         }
         return clingDevices;
@@ -83,6 +83,11 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
         ClingControlPoint.getInstance().controlPoint = mUpnpService.getControlPoint();
 
         return ClingControlPoint.getInstance();
+    }
+
+    @Override
+    public Registry getRegistry() {
+        return mUpnpService.getRegistry();
     }
 
     @Override

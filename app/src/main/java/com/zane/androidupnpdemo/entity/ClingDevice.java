@@ -12,4 +12,7 @@ public class ClingDevice  implements IDevice {
 
     public Device device;
 
+    public ClingDevice(Device device) {
+        this.device = device;
+    }
 }

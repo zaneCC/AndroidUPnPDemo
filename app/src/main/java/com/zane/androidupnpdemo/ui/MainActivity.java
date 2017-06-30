@@ -12,12 +12,17 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.zane.androidupnpdemo.entity.ClingDeviceList;
+import com.zane.androidupnpdemo.listener.BrowseRegistryListener;
+import com.zane.androidupnpdemo.listener.DeviceListChangedListener;
 import com.zane.androidupnpdemo.service.manager.ClingUpnpServiceManager;
 import com.zane.androidupnpdemo.R;
 import com.zane.androidupnpdemo.entity.ClingDevice;
 import com.zane.androidupnpdemo.entity.IDevice;
 import com.zane.androidupnpdemo.service.ClingUpnpService;
 import com.zane.androidupnpdemo.service.SystemService;
+
+import org.fourthline.cling.model.meta.Device;
 
 import java.util.Collection;
 
@@ -29,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private ListView mDeviceList;
     private SwipeRefreshLayout mRefreshLayout;
     private ArrayAdapter<ClingDevice> mDevicesAdapter;
+    /** 用于监听发现设备 */
+    private BrowseRegistryListener mBrowseRegistryListener = new BrowseRegistryListener();
 
     private ServiceConnection mUpnpServiceConnection = new ServiceConnection() {
         @Override
@@ -40,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
             ClingUpnpServiceManager clingUpnpServiceManager = ClingUpnpServiceManager.getInstance();
             clingUpnpServiceManager.setUpnpService(beyondUpnpService);
+
+            clingUpnpServiceManager.getRegistry().addListener(mBrowseRegistryListener);
             //Search on service created.
             clingUpnpServiceManager.searchDevices();
         }
@@ -70,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             ClingUpnpServiceManager.getInstance().setSystemService(null);
         }
     };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +120,33 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mDeviceList.setAdapter(mDevicesAdapter);
 
         mRefreshLayout.setOnRefreshListener(this);
+
+        // 设置发现设备监听
+        mBrowseRegistryListener.setOnDeviceListChangedListener(new DeviceListChangedListener() {
+            @Override
+            public void onDeviceAdded(final IDevice device) {
+                runOnUiThread(new Runnable() {
+                    public void run() {
+
+//                        DeviceDisplay d = new DeviceDisplay(device);
+//                        int position = mDevicesAdapter.getPosition(d);
+//                        if (position >= 0) {
+//                            // Device already in the list, re-set new value at same position
+//                            listAdapter.remove(d);
+//                            listAdapter.insert(d, position);
+//                        } else {
+//                            listAdapter.add(d);
+//                        }
+                        mDevicesAdapter.add((ClingDevice) device);
+                    }
+                });
+            }
+
+            @Override
+            public void onDeviceRemoved(IDevice device) {
+                mDevicesAdapter.remove((ClingDevice) device);
+            }
+        });
     }
 
     @Override
@@ -123,10 +160,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
     private void refreshDeviceList() {
-        Collection<? extends IDevice> devices = ClingUpnpServiceManager.getInstance().getDmrDevices();
+        Collection<ClingDevice> devices = ClingUpnpServiceManager.getInstance().getDmrDevices();
+        ClingDeviceList.getInstance().setClingDeviceList(devices);
         if (devices != null){
             mDevicesAdapter.clear();
-            mDevicesAdapter.addAll((Collection<? extends ClingDevice>) devices);
+            mDevicesAdapter.addAll(devices);
         }
     }
 }

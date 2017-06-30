@@ -3,6 +3,8 @@ package com.zane.androidupnpdemo.service.manager;
 import com.zane.androidupnpdemo.service.ClingUpnpService;
 import com.zane.androidupnpdemo.service.SystemService;
 
+import org.fourthline.cling.registry.Registry;
+
 /**
  * 说明：
  * 作者：zhouzhan
@@ -14,4 +16,6 @@ public interface IClingUpnpServiceManager extends IUpnpServiceManager {
     void setUpnpService(ClingUpnpService upnpService);
 
     void setSystemService(SystemService systemService);
+
+    Registry getRegistry();
 }
