@@ -3,7 +3,7 @@ package com.zane.androidupnpdemo.listener;
 import com.zane.androidupnpdemo.entity.IDevice;
 
 /**
- * 说明：
+ * 说明：设备状态改变监听接口
  * 作者：zhouzhan
  * 日期：17/6/30 11:09
  */

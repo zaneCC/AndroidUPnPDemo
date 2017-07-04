@@ -6,5 +6,7 @@ package com.zane.androidupnpdemo.entity;
  * 日期：17/6/27 17:47
  */
 
-public interface IDevice {
+public interface IDevice<T> {
+
+    T getDevice();
 }

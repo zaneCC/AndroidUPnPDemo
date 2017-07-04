@@ -6,7 +6,18 @@ package com.zane.androidupnpdemo.entity;
  * 日期：17/6/27 17:47
  */
 
-public interface IControlPoint {
+public interface IControlPoint<T> {
+
+    /**
+     * @return  返回控制点
+     */
+    T getControlPoint();
+
+    /**
+     * 设置控制点
+     * @param controlPoint  控制点
+     */
+    void setControlPoint(T controlPoint);
 
     /**
      * 销毁 清空缓存

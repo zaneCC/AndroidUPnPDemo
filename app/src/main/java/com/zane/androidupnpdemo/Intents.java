@@ -23,7 +23,7 @@ public class Intents {
     /**
      * Prefix for all intents created
      */
-    public static final String INTENT_PREFIX = "com.kevinshen.beyondupup.";
+    public static final String INTENT_PREFIX = "com.zane.androidupnpdemo.";
 
     /**
      * Prefix for all extra data added to intents

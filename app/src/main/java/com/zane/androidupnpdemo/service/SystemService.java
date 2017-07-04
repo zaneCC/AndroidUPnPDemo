@@ -23,6 +23,8 @@ import android.util.Log;
 
 
 import com.zane.androidupnpdemo.Intents;
+import com.zane.androidupnpdemo.entity.ClingDevice;
+import com.zane.androidupnpdemo.entity.IDevice;
 import com.zane.androidupnpdemo.service.manager.ClingUpnpServiceManager;
 
 import org.fourthline.cling.controlpoint.ControlPoint;
@@ -52,12 +54,12 @@ public class SystemService extends Service {
     private static final String TAG = SystemService.class.getSimpleName();
 
     private Binder binder = new LocalBinder();
-    private Device mSelectedDevice;
+    private ClingDevice mSelectedDevice;
     private int mDeviceVolume;
     private AVTransportSubscriptionCallback mAVTransportSubscriptionCallback;
 
     //Jetty DMS Server
-    private ExecutorService mThreadPool = Executors.newCachedThreadPool();
+//    private ExecutorService mThreadPool = Executors.newCachedThreadPool();
 //    private JettyResourceServer mJettyResourceServer;
 
     @Override
@@ -91,21 +93,21 @@ public class SystemService extends Service {
         }
     }
 
-    public Device getSelectedDevice() {
+    public IDevice getSelectedDevice() {
         return mSelectedDevice;
     }
 
-    public void setSelectedDevice(Device selectedDevice, ControlPoint controlPoint) {
+    public void setSelectedDevice(IDevice selectedDevice, ControlPoint controlPoint) {
         if (selectedDevice == mSelectedDevice) return;
 
         Log.i(TAG, "Change selected device.");
-        mSelectedDevice = selectedDevice;
+        mSelectedDevice = (ClingDevice) selectedDevice;
         //End last device's subscriptions
         if (mAVTransportSubscriptionCallback != null) {
             mAVTransportSubscriptionCallback.end();
         }
         //Init Subscriptions
-        mAVTransportSubscriptionCallback = new AVTransportSubscriptionCallback(mSelectedDevice.findService(ClingUpnpServiceManager.AV_TRANSPORT_SERVICE));
+        mAVTransportSubscriptionCallback = new AVTransportSubscriptionCallback(mSelectedDevice.getDevice().findService(ClingUpnpServiceManager.AV_TRANSPORT_SERVICE));
         controlPoint.execute(mAVTransportSubscriptionCallback);
 
         Intent intent = new Intent(Intents.ACTION_CHANGE_DEVICE);

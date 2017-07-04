@@ -43,7 +43,7 @@ public class ClingDeviceList {
     @Nullable
     public ClingDevice getClingDevice(Device device){
         for (ClingDevice clingDevice : mClingDeviceList){
-            Device deviceTemp = clingDevice.device;
+            Device deviceTemp = clingDevice.getDevice();
             if (deviceTemp != null && deviceTemp.equals(device)){
                 return clingDevice;
             }
@@ -53,7 +53,7 @@ public class ClingDeviceList {
 
     public boolean contain(Device device){
         for (ClingDevice clingDevice : mClingDeviceList){
-            Device deviceTemp = clingDevice.device;
+            Device deviceTemp = clingDevice.getDevice();
             if (deviceTemp != null && deviceTemp.equals(device)){
                 return true;
             }

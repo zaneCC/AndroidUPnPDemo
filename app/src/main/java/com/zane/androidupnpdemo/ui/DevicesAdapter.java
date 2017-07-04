@@ -33,11 +33,11 @@ public class DevicesAdapter extends ArrayAdapter<ClingDevice> {
             convertView = mInflater.inflate(R.layout.devices_items, null);
 
         ClingDevice item = getItem(position);
-        if (item == null || item.device == null) {
+        if (item == null || item.getDevice() == null) {
             return convertView;
         }
 
-        Device device = item.device;
+        Device device = item.getDevice();
 
         ImageView imageView = (ImageView)convertView.findViewById(R.id.listview_item_image);
         imageView.setBackgroundResource(R.drawable.ic_action_dock);

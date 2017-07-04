@@ -40,6 +40,12 @@ public interface IUpnpServiceManager {
     IDevice getSelectedDevice();
 
     /**
+     * 设置选中的设备
+     * @param device    已选中设备
+     */
+    void setSelectedDevice(IDevice device);
+
+    /**
      * 销毁
      */
     void destroy();

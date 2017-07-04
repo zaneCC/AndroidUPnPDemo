@@ -9,11 +9,16 @@ import android.os.IBinder;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.zane.androidupnpdemo.control.ClingPlayControl;
 import com.zane.androidupnpdemo.entity.ClingDeviceList;
+import com.zane.androidupnpdemo.entity.IResponse;
 import com.zane.androidupnpdemo.listener.BrowseRegistryListener;
+import com.zane.androidupnpdemo.listener.ControlCallback;
 import com.zane.androidupnpdemo.listener.DeviceListChangedListener;
 import com.zane.androidupnpdemo.service.manager.ClingUpnpServiceManager;
 import com.zane.androidupnpdemo.R;
@@ -97,8 +102,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         Intent upnpServiceIntent = new Intent(MainActivity.this, ClingUpnpService.class);
         bindService(upnpServiceIntent, mUpnpServiceConnection, Context.BIND_AUTO_CREATE);
         // Bind System service
-//        Intent systemServiceIntent = new Intent(MainActivity.this, SystemService.class);
-//        bindService(systemServiceIntent, mSystemServiceConnection, Context.BIND_AUTO_CREATE);
+        Intent systemServiceIntent = new Intent(MainActivity.this, SystemService.class);
+        bindService(systemServiceIntent, mSystemServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -107,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         // Unbind UPnP service
         unbindService(mUpnpServiceConnection);
         // Unbind System service
-//        unbindService(mSystemServiceConnection);
+        unbindService(mSystemServiceConnection);
 
         ClingUpnpServiceManager.getInstance().destroy();
     }
@@ -121,30 +126,47 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         mRefreshLayout.setOnRefreshListener(this);
 
+        mDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // 播放指定的视频
+                ClingUpnpServiceManager.getInstance().setSelectedDevice(mDevicesAdapter.getItem(position));
+
+                ClingPlayControl control = new ClingPlayControl();
+                control.playNew("http://mp4.res.hunantv.com/video/1155/79c71f27a58042b23776691d206d23bf.mp4",
+                        new ControlCallback() {
+
+                    @Override
+                    public void success(IResponse response) {
+                        Log.e(TAG, "play success");
+                    }
+
+                    @Override
+                    public void fail(IResponse response) {
+                        Log.e(TAG, "play fail");
+                    }
+                });
+            }
+        });
+
         // 设置发现设备监听
         mBrowseRegistryListener.setOnDeviceListChangedListener(new DeviceListChangedListener() {
             @Override
             public void onDeviceAdded(final IDevice device) {
                 runOnUiThread(new Runnable() {
                     public void run() {
-
-//                        DeviceDisplay d = new DeviceDisplay(device);
-//                        int position = mDevicesAdapter.getPosition(d);
-//                        if (position >= 0) {
-//                            // Device already in the list, re-set new value at same position
-//                            listAdapter.remove(d);
-//                            listAdapter.insert(d, position);
-//                        } else {
-//                            listAdapter.add(d);
-//                        }
                         mDevicesAdapter.add((ClingDevice) device);
                     }
                 });
             }
 
             @Override
-            public void onDeviceRemoved(IDevice device) {
-                mDevicesAdapter.remove((ClingDevice) device);
+            public void onDeviceRemoved(final IDevice device) {
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        mDevicesAdapter.remove((ClingDevice) device);
+                    }
+                });
             }
         });
     }
@@ -159,6 +181,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mDeviceList.setEnabled(true);
     }
 
+    /**
+     * 刷新设备
+     */
     private void refreshDeviceList() {
         Collection<ClingDevice> devices = ClingUpnpServiceManager.getInstance().getDmrDevices();
         ClingDeviceList.getInstance().setClingDeviceList(devices);

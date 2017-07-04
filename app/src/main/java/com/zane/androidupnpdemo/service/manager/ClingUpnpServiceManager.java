@@ -77,10 +77,11 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
     }
 
     @Override
+    @Nullable
     public IControlPoint getControlPoint() {
         if (Utils.isNull(mUpnpService))
             return null;
-        ClingControlPoint.getInstance().controlPoint = mUpnpService.getControlPoint();
+        ClingControlPoint.getInstance().setControlPoint(mUpnpService.getControlPoint());
 
         return ClingControlPoint.getInstance();
     }
@@ -92,7 +93,15 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
 
     @Override
     public IDevice getSelectedDevice() {
-        return null;
+        if (Utils.isNull(mSystemService)){
+            return null;
+        }
+        return mSystemService.getSelectedDevice();
+    }
+
+    @Override
+    public void setSelectedDevice(IDevice device) {
+        mSystemService.setSelectedDevice(device, mUpnpService.getControlPoint());
     }
 
     @Override

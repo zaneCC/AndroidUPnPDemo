@@ -8,10 +8,10 @@ import org.fourthline.cling.controlpoint.ControlPoint;
  * 日期：17/6/28 17:03
  */
 
-public class ClingControlPoint implements IControlPoint {
+public class ClingControlPoint implements IControlPoint<ControlPoint> {
 
     private static ClingControlPoint INSTANCE = null;
-    public ControlPoint controlPoint;
+    private ControlPoint mControlPoint;
 
     private ClingControlPoint() {
     }
@@ -24,8 +24,18 @@ public class ClingControlPoint implements IControlPoint {
     }
 
     @Override
+    public ControlPoint getControlPoint() {
+        return mControlPoint;
+    }
+
+    @Override
+    public void setControlPoint(ControlPoint controlPoint) {
+        mControlPoint = controlPoint;
+    }
+
+    @Override
     public void destroy() {
-        controlPoint = null;
+        mControlPoint = null;
         INSTANCE = null;
     }
 }
