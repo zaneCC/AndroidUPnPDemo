@@ -1,11 +1,15 @@
 package com.zane.androidupnpdemo.ui;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.zane.androidupnpdemo.Intents;
 import com.zane.androidupnpdemo.control.ClingPlayControl;
 import com.zane.androidupnpdemo.entity.ClingDeviceList;
 import com.zane.androidupnpdemo.entity.IResponse;
@@ -30,18 +35,32 @@ import com.zane.androidupnpdemo.service.SystemService;
 import com.zane.androidupnpdemo.util.Utils;
 
 import org.fourthline.cling.model.meta.Device;
+import org.fourthline.cling.support.model.MediaInfo;
+import org.fourthline.cling.support.model.PositionInfo;
+import org.fourthline.cling.support.model.TransportState;
 
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    public static final int PLAY_ACTION = 0xa1;
+    public static final int PAUSE_ACTION = 0xa2;
+    public static final int STOP_ACTION = 0xa3;
+    public static final int GET_MEDIA_INFO_ACTION = 0xa4;
+    public static final int GET_POSITION_INFO_ACTION = 0xa5;
+    public static final int RESUME_SEEKBAR_ACTION = 0xa6;
+    public static final int GET_VOLUME_ACTION = 0xa7;
+    public static final int SET_VOLUME_ACTION = 0xa8;
+
     private Context mContext;
 
     private ListView mDeviceList;
     private SwipeRefreshLayout mRefreshLayout;
     private TextView mTVSelected;
 
+    private BroadcastReceiver mTransportStateBroadcastReceiver;
     private ArrayAdapter<ClingDevice> mDevicesAdapter;
     /**
      * 投屏控制器
@@ -103,6 +122,20 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         initView();
         bindServices();
+        registerReceivers();
+    }
+
+    private void registerReceivers() {
+        //Register play status broadcast
+        mTransportStateBroadcastReceiver = new TransportStateBroadcastReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intents.ACTION_PLAYING);
+        filter.addAction(Intents.ACTION_PAUSED_PLAYBACK);
+        filter.addAction(Intents.ACTION_STOPPED);
+        filter.addAction(Intents.ACTION_CHANGE_DEVICE);
+        filter.addAction(Intents.ACTION_SET_VOLUME);
+        filter.addAction(Intents.ACTION_UPDATE_LAST_CHANGE);
+        registerReceiver(mTransportStateBroadcastReceiver,filter);
     }
 
 
@@ -122,6 +155,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         unbindService(mUpnpServiceConnection);
         // Unbind System service
         unbindService(mSystemServiceConnection);
+        // UnRegister Receiver
+        unregisterReceiver(mTransportStateBroadcastReceiver);
 
         ClingUpnpServiceManager.getInstance().destroy();
         ClingDeviceList.getInstance().destroy();
@@ -142,14 +177,16 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // 选择连接设备
                 ClingDevice item = mDevicesAdapter.getItem(position);
-                if (Utils.isNull(item))
+                if (Utils.isNull(item)) {
                     return;
+                }
 
                 ClingUpnpServiceManager.getInstance().setSelectedDevice(item);
 
                 Device device = item.getDevice();
-                if (Utils.isNull(device))
+                if (Utils.isNull(device)) {
                     return;
+                }
 
                 String selectedDeviceName = String.format(getString(R.string.selectedText), device.getDetails().getFriendlyName());
                 mTVSelected.setText(selectedDeviceName);
@@ -194,15 +231,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private void refreshDeviceList() {
         Collection<ClingDevice> devices = ClingUpnpServiceManager.getInstance().getDmrDevices();
         ClingDeviceList.getInstance().setClingDeviceList(devices);
-        if (devices != null){
+        if (devices != null) {
             mDevicesAdapter.clear();
             mDevicesAdapter.addAll(devices);
         }
     }
 
-    public void onClick(View view){
+    public void onClick(View view) {
         int id = view.getId();
-        switch (id){
+        switch (id) {
             case R.id.bt_play:
                 play();
                 break;
@@ -255,18 +292,82 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      * 播放视频
      */
     private void play() {
-        mClingPlayControl.playNew("http://mp4.res.hunantv.com/video/1155/79c71f27a58042b23776691d206d23bf.mp4",
-                new ControlCallback() {
+        TransportState currentState = mClingPlayControl.getCurrentState();
 
-                    @Override
-                    public void success(IResponse response) {
-                        Log.e(TAG, "play success");
-                    }
+        /**
+         * 通过判断状态 来决定 是继续播放 还是重新播放
+         */
 
-                    @Override
-                    public void fail(IResponse response) {
-                        Log.e(TAG, "play fail");
-                    }
-                });
+        if (currentState.equals(TransportState.STOPPED)){
+            mClingPlayControl.playNew("http://mp4.res.hunantv.com/video/1155/79c71f27a58042b23776691d206d23bf.mp4",
+                    new ControlCallback() {
+
+                        @Override
+                        public void success(IResponse response) {
+                            Log.e(TAG, "play success");
+                        }
+
+                        @Override
+                        public void fail(IResponse response) {
+                            Log.e(TAG, "play fail");
+                        }
+                    });
+        } else {
+            mClingPlayControl.play(new ControlCallback() {
+                @Override
+                public void success(IResponse response) {
+                    Log.e(TAG, "play success");
+                }
+
+                @Override
+                public void fail(IResponse response) {
+                    Log.e(TAG, "play fail");
+                }
+            });
+        }
+
+
+    }
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case PLAY_ACTION:
+                    Log.i(TAG, "Execute PLAY_ACTION");
+                    mClingPlayControl.setCurrentState(TransportState.PLAYING);
+                    break;
+                case PAUSE_ACTION:
+                    Log.i(TAG, "Execute PAUSE_ACTION");
+                    mClingPlayControl.setCurrentState(TransportState.PAUSED_PLAYBACK);
+                    break;
+                case STOP_ACTION:
+                    Log.i(TAG, "Execute STOP_ACTION");
+                    mClingPlayControl.setCurrentState(TransportState.STOPPED);
+                    break;
+            }
+        }
+    };
+
+    /**
+     * 接收状态改变信息
+     */
+    private class TransportStateBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.e(TAG, "Receive playback intent:" + intent.getAction());
+            if (Intents.ACTION_PLAYING.equals(intent.getAction())) {
+                mHandler.sendEmptyMessage(PLAY_ACTION);
+
+            } else if (Intents.ACTION_PAUSED_PLAYBACK.equals(intent.getAction())) {
+                mHandler.sendEmptyMessage(PAUSE_ACTION);
+
+            } else if (Intents.ACTION_STOPPED.equals(intent.getAction())) {
+                mHandler.sendEmptyMessage(STOP_ACTION);
+
+            }
+        }
     }
 }
