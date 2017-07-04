@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.zane.androidupnpdemo.ui.MainActivity"
+    android:orientation="vertical"
     android:background="@android:color/white">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/srl_refresh"
         android:layout_width="368dp"
-        android:layout_height="495dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         tools:layout_editor_absoluteY="8dp"
         tools:layout_editor_absoluteX="8dp">
 
@@ -21,4 +23,59 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/tv_selected"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_size_large"
+        android:textColor="@android:color/primary_text_light"
+        android:paddingTop="@dimen/listview_items_padding_gp_top"
+        android:paddingBottom="@dimen/listview_items_padding_gp_top"
+        android:text="@string/notice"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/progress"/>
+
+        <SeekBar
+            android:id="@+id/audio_player_seekbar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/bt_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/play"
+            android:onClick="onClick"/>
+        <Button
+            android:id="@+id/bt_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pause"
+            android:onClick="onClick"/>
+        <Button
+            android:id="@+id/bt_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/stop"
+            android:onClick="onClick"/>
+
+
+    </LinearLayout>
+
+</LinearLayout>

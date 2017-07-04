@@ -5,11 +5,13 @@ import android.util.Log;
 import com.zane.androidupnpdemo.entity.ClingDevice;
 import com.zane.androidupnpdemo.entity.ClingDeviceList;
 import com.zane.androidupnpdemo.service.manager.ClingUpnpServiceManager;
+import com.zane.androidupnpdemo.util.ClingUtils;
 import com.zane.androidupnpdemo.util.Utils;
 
 import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.LocalDevice;
 import org.fourthline.cling.model.meta.RemoteDevice;
+import org.fourthline.cling.model.meta.Service;
 import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
 
@@ -51,28 +53,31 @@ public class BrowseRegistryListener extends DefaultRegistryListener {
 
     @Override
     public void localDeviceAdded(Registry registry, LocalDevice device) {
-        deviceAdded(device);
+        //        deviceAdded(device); // 本地设备 已加入
     }
 
     @Override
     public void localDeviceRemoved(Registry registry, LocalDevice device) {
-        deviceRemoved(device);
+        //        deviceRemoved(device); // 本地设备 已移除
     }
 
     public void deviceAdded(Device device) {
         Log.e(TAG, "deviceAdded");
-        if (!device.getType().equals(ClingUpnpServiceManager.dmrDeviceType)){
-            Log.e(TAG,"deviceAdded called, but not match ");
+        if (!device.getType().equals(ClingUpnpServiceManager.dmrDeviceType)) {
+            Log.e(TAG, "deviceAdded called, but not match");
+            return;
+        }
+        // TODO: 17/7/4 这种方式有点 low , 能否在源头过滤???
+        Service service = ClingUtils.findAVTServiceByDevice(device);
+        if (Utils.isNull(service) || service.getActions().length == 0) {
+            Log.e(TAG, "service is not match");
             return;
         }
 
         if (Utils.isNotNull(mOnDeviceListChangedListener)) {
-            ClingDevice clingDevice = ClingDeviceList.getInstance().getClingDevice(device);
-            if (clingDevice == null) {
-                clingDevice = new ClingDevice(device);
-                ClingDeviceList.getInstance().addDevice(clingDevice);
-                mOnDeviceListChangedListener.onDeviceAdded(clingDevice);
-            }
+            ClingDevice clingDevice = new ClingDevice(device);
+            ClingDeviceList.getInstance().addDevice(clingDevice);
+            mOnDeviceListChangedListener.onDeviceAdded(clingDevice);
         }
     }
 

@@ -1,7 +1,5 @@
 package com.zane.androidupnpdemo.control;
 
-import android.util.Log;
-
 import com.zane.androidupnpdemo.entity.ClingResponse;
 import com.zane.androidupnpdemo.entity.IResponse;
 import com.zane.androidupnpdemo.listener.ControlCallback;
@@ -13,9 +11,11 @@ import org.fourthline.cling.controlpoint.ControlPoint;
 import org.fourthline.cling.model.action.ActionInvocation;
 import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.meta.Service;
+import org.fourthline.cling.support.avtransport.callback.Pause;
 import org.fourthline.cling.support.avtransport.callback.Play;
 import org.fourthline.cling.support.avtransport.callback.SetAVTransportURI;
 import org.fourthline.cling.support.avtransport.callback.Stop;
+import org.fourthline.cling.support.model.TransportState;
 
 /**
  * 说明：Cling 实现的控制方法
@@ -26,17 +26,13 @@ import org.fourthline.cling.support.avtransport.callback.Stop;
 public class ClingPlayControl implements IPlayControl{
 
     private static final String TAG = ClingPlayControl.class.getSimpleName();
+    /**
+     * 当前状态
+     */
+    private TransportState mCurrentState = TransportState.STOPPED;
 
     @Override
     public void playNew(final String url, final ControlCallback callback) {
-//        final Service avtService = ClingUtils.findServiceFromSelectedDevice(ClingUpnpServiceManager.AV_TRANSPORT_SERVICE);
-//
-//        if (Utils.isNull(avtService))
-//            return;
-//
-//        final ControlPoint controlPointImpl = ClingUtils.getControlPoint();
-//        if (Utils.isNull(controlPointImpl))
-//            return;
 
         stop(new ControlCallback() { // 1、 停止当前播放视频
             @Override
@@ -64,44 +60,6 @@ public class ClingPlayControl implements IPlayControl{
                 }
             }
         });
-
-//        controlPointImpl.execute(new Stop(avtService) {
-//
-//            @Override
-//            public void success(ActionInvocation invocation) {
-//                super.success(invocation);
-//
-//                controlPointImpl.execute(new SetAVTransportURI(avtService, url) {
-//
-//                    @Override
-//                    public void success(ActionInvocation invocation) {
-//                        super.success(invocation);
-//                        //Second,Set Play command.
-//                        controlPoint.execute(new Play(avtService) {
-//                            @Override
-//                            public void success(ActionInvocation invocation) {
-//                                Log.i(TAG, "PlayNewItem success:" + url);
-//                            }
-//
-//                            @Override
-//                            public void failure(ActionInvocation arg0, UpnpResponse arg1, String arg2) {
-//                                Log.e(TAG, "playNewItem failed");
-//                            }
-//                        });
-//                        Log.i(TAG, "PlayNewItem success:" + url);
-//                    }
-//
-//                    @Override
-//                    public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
-//                        Log.e(TAG, "playNewItem failed");
-//                    }
-//                });
-//            }
-//
-//            @Override
-//            public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
-//            }
-//        });
     }
 
     @Override
@@ -134,8 +92,32 @@ public class ClingPlayControl implements IPlayControl{
     }
 
     @Override
-    public void pause(ControlCallback callback) {
+    public void pause(final ControlCallback callback) {
+        final Service avtService = ClingUtils.findServiceFromSelectedDevice(ClingUpnpServiceManager.AV_TRANSPORT_SERVICE);
+        if (Utils.isNull(avtService))
+            return;
 
+        final ControlPoint controlPointImpl = ClingUtils.getControlPoint();
+        if (Utils.isNull(controlPointImpl))
+            return;
+
+        controlPointImpl.execute(new Pause(avtService) {
+
+            @Override
+            public void success(ActionInvocation invocation) {
+                super.success(invocation);
+                if (Utils.isNotNull(callback)){
+                    callback.success(new ClingResponse(invocation));
+                }
+            }
+
+            @Override
+            public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
+                if (Utils.isNotNull(callback)){
+                    callback.fail(new ClingResponse(invocation, operation, defaultMsg));
+                }
+            }
+        });
     }
 
     @Override
@@ -201,5 +183,15 @@ public class ClingPlayControl implements IPlayControl{
                 }
             }
         });
+    }
+
+    public TransportState getCurrentState() {
+        return mCurrentState;
+    }
+
+    public void setCurrentState(TransportState currentState) {
+        if (this.mCurrentState != currentState) {
+            this.mCurrentState = currentState;
+        }
     }
 }

@@ -24,12 +24,12 @@ public class ClingUtils {
      * 通过 ServiceType 获取已选择设备的服务
      *
      * @param serviceType   服务类型
-     * @return  服务
+     * @return 服务
      */
     @Nullable
-    public static Service findServiceFromSelectedDevice(ServiceType serviceType){
+    public static Service findServiceFromSelectedDevice(ServiceType serviceType) {
         IDevice selectedDevice = ClingUpnpServiceManager.getInstance().getSelectedDevice();
-        if (Utils.isNull(selectedDevice)){
+        if (Utils.isNull(selectedDevice)) {
             return null;
         }
 
@@ -38,16 +38,28 @@ public class ClingUtils {
     }
 
     /**
-     * 获取控制点
+     * 获取 device 的 avt 服务
      *
-     * @return  控制点
+     * @param device    设备
+     * @return 服务
      */
     @Nullable
-    public static ControlPoint getControlPoint(){
-        IControlPoint controlPoint = ClingUpnpServiceManager.getInstance().getControlPoint();
-        if (Utils.isNull(controlPoint))
-            return null;
+    public static Service findAVTServiceByDevice(Device device) {
+        return device.findService(ClingUpnpServiceManager.AV_TRANSPORT_SERVICE);
+    }
 
-        return  (ControlPoint) controlPoint.getControlPoint();
+    /**
+     * 获取控制点
+     *
+     * @return 控制点
+     */
+    @Nullable
+    public static ControlPoint getControlPoint() {
+        IControlPoint controlPoint = ClingUpnpServiceManager.getInstance().getControlPoint();
+        if (Utils.isNull(controlPoint)) {
+            return null;
+        }
+
+        return (ControlPoint) controlPoint.getControlPoint();
     }
 }

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">AndroidUPnPDemo</string>
+
+    <string name="notice">请选择连接设备，选择连接设备才可播放</string>
+    <string name="selectedText">已选中: %s</string>
+    <string name="progress">进度</string>
+    <string name="play">播放</string>
+    <string name="pause">暂停</string>
+    <string name="stop">停止</string>
 </resources>
