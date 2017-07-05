@@ -5,7 +5,7 @@
     <string name="selectedText">已选中: %s</string>
     <string name="progress">进度</string>
     <string name="volume">音量</string>
-    <string name="light">亮度</string>
+    <string name="mute">静音</string>
     <string name="play">播放</string>
     <string name="pause">暂停</string>
     <string name="stop">停止</string>

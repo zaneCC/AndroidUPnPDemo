@@ -1,5 +1,6 @@
 package com.zane.androidupnpdemo.control;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.zane.androidupnpdemo.entity.ClingResponse;
@@ -19,6 +20,8 @@ import org.fourthline.cling.support.avtransport.callback.Seek;
 import org.fourthline.cling.support.avtransport.callback.SetAVTransportURI;
 import org.fourthline.cling.support.avtransport.callback.Stop;
 import org.fourthline.cling.support.model.TransportState;
+import org.fourthline.cling.support.renderingcontrol.callback.SetMute;
+import org.fourthline.cling.support.renderingcontrol.callback.SetVolume;
 
 /**
  * 说明：Cling 实现的控制方法
@@ -169,6 +172,63 @@ public class ClingPlayControl implements IPlayControl{
             @Override
             public void success(ActionInvocation invocation) {
                 super.success(invocation);
+                if (Utils.isNotNull(callback)){
+                    callback.success(new ClingResponse(invocation));
+                }
+            }
+
+            @Override
+            public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
+                if (Utils.isNotNull(callback)){
+                    callback.fail(new ClingResponse(invocation, operation, defaultMsg));
+                }
+            }
+        });
+    }
+
+    @Override
+    public void setVolume(int pos, @Nullable final ControlCallback callback) {
+        final Service rcService = ClingUtils.findServiceFromSelectedDevice(ClingUpnpServiceManager.RENDERING_CONTROL_SERVICE);
+        if (Utils.isNull(rcService))
+            return;
+
+        final ControlPoint controlPointImpl = ClingUtils.getControlPoint();
+        if (Utils.isNull(controlPointImpl))
+            return;
+
+        controlPointImpl.execute(new SetVolume(rcService, pos) {
+
+            @Override
+            public void success(ActionInvocation invocation) {
+                if (Utils.isNotNull(callback)){
+                    callback.success(new ClingResponse(invocation));
+                }
+            }
+
+            @Override
+            public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
+                if (Utils.isNotNull(callback)){
+                    callback.fail(new ClingResponse(invocation, operation, defaultMsg));
+                }
+            }
+        });
+
+    }
+
+    @Override
+    public void setMute(boolean desiredMute, @Nullable final ControlCallback callback) {
+        final Service rcService = ClingUtils.findServiceFromSelectedDevice(ClingUpnpServiceManager.RENDERING_CONTROL_SERVICE);
+        if (Utils.isNull(rcService))
+            return;
+
+        final ControlPoint controlPointImpl = ClingUtils.getControlPoint();
+        if (Utils.isNull(controlPointImpl))
+            return;
+
+        controlPointImpl.execute(new SetMute(rcService, desiredMute) {
+
+            @Override
+            public void success(ActionInvocation invocation) {
                 if (Utils.isNotNull(callback)){
                     callback.success(new ClingResponse(invocation));
                 }

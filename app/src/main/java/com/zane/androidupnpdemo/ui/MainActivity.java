@@ -16,8 +16,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.zane.androidupnpdemo.Intents;
@@ -59,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private TextView mTVSelected;
     private SeekBar mSeekProgress;
     private SeekBar mSeekVolume;
-    private SeekBar mSeekLight;
+    private Switch mSwitchMute;
 
     private BroadcastReceiver mTransportStateBroadcastReceiver;
     private ArrayAdapter<ClingDevice> mDevicesAdapter;
@@ -170,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mTVSelected = (TextView) findViewById(R.id.tv_selected);
         mSeekProgress = (SeekBar) findViewById(R.id.seekbar_progress);
         mSeekVolume = (SeekBar) findViewById(R.id.seekbar_volume);
-        mSeekLight = (SeekBar) findViewById(R.id.seekbar_light);
+        mSwitchMute = (Switch) findViewById(R.id.sw_mute);
 
         mDevicesAdapter = new DevicesAdapter(mContext);
         mDeviceList.setAdapter(mDevicesAdapter);
@@ -178,6 +180,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         /** 这里为了模拟 seek 效果(假设视频时间为 15s)，拖住 seekbar 同步视频时间，
          * 在实际中 使用的是片源的时间 */
         mSeekProgress.setMax(15);
+
+        // 最大音量就是 100，不要问我为什么
+        mSeekVolume.setMax(100);
     }
 
     private void initListeners() {
@@ -225,7 +230,26 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }
         });
 
+        // 静音开关
+        mSwitchMute.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mClingPlayControl.setMute(isChecked, new ControlCallback() {
+                    @Override
+                    public void success(IResponse response) {
+                        Log.e(TAG, "setMute success");
+                    }
+
+                    @Override
+                    public void fail(IResponse response) {
+                        Log.e(TAG, "setMute fail");
+                    }
+                });
+            }
+        });
+
         mSeekProgress.setOnSeekBarChangeListener(this);
+        mSeekVolume.setOnSeekBarChangeListener(this);
     }
 
     @Override
@@ -378,10 +402,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         Log.e(TAG, "Stop Seek");
         int id = seekBar.getId();
         switch (id) {
-            case R.id.seekbar_progress:
+            case R.id.seekbar_progress: // 进度
 
                 int currentProgress = seekBar.getProgress() * 1000; // 转为秒
-
                 mClingPlayControl.seek(currentProgress, new ControlCallback() {
                     @Override
                     public void success(IResponse response) {
@@ -391,6 +414,22 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     @Override
                     public void fail(IResponse response) {
                         Log.e(TAG, "seek fail");
+                    }
+                });
+                break;
+
+            case R.id.seekbar_volume:   // 音量
+
+                int currentVolume = seekBar.getProgress();
+                mClingPlayControl.setVolume(currentVolume, new ControlCallback() {
+                    @Override
+                    public void success(IResponse response) {
+                        Log.e(TAG, "volume success");
+                    }
+
+                    @Override
+                    public void fail(IResponse response) {
+                        Log.e(TAG, "volume fail");
                     }
                 });
                 break;

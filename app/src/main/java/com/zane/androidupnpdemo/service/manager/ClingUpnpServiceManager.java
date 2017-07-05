@@ -31,6 +31,7 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
 
     public static final ServiceType CONTENT_DIRECTORY_SERVICE = new UDAServiceType("ContentDirectory");
     public static final ServiceType AV_TRANSPORT_SERVICE = new UDAServiceType("AVTransport");
+    /** 控制服务 */
     public static final ServiceType RENDERING_CONTROL_SERVICE = new UDAServiceType("RenderingControl");
     public static final DeviceType dmrDeviceType = new UDADeviceType("MediaRenderer");
 

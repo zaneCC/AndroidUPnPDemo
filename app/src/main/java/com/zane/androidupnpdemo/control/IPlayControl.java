@@ -1,5 +1,7 @@
 package com.zane.androidupnpdemo.control;
 
+import android.support.annotation.Nullable;
+
 import com.zane.androidupnpdemo.listener.ControlCallback;
 
 /**
@@ -14,29 +16,41 @@ public interface IPlayControl {
      *
      * @param url   片源地址
      */
-    void playNew(String url, ControlCallback callback);
+    void playNew(String url, @Nullable ControlCallback callback);
 
     /**
      * 播放
      */
-    void play(ControlCallback callback);
+    void play(@Nullable ControlCallback callback);
 
     /**
      * 暂停
      */
-    void pause(ControlCallback callback);
+    void pause(@Nullable ControlCallback callback);
 
     /**
      * 停止
      */
-    void stop(ControlCallback callback);
+    void stop(@Nullable ControlCallback callback);
 
     /**
      * 视频 seek
      *
      * @param pos   seek到的位置(单位:毫秒)
      */
-    void seek(int pos, ControlCallback callback);
+    void seek(int pos, @Nullable ControlCallback callback);
 
+    /**
+     * 设置音量
+     *
+     * @param pos   音量值，最大为 100，最小为 0
+     */
+    void setVolume(int pos, @Nullable ControlCallback callback);
 
+    /**
+     * 设置静音
+     *
+     * @param desiredMute   是否静音
+     */
+    void setMute(boolean desiredMute, @Nullable ControlCallback callback);
 }

@@ -33,6 +33,13 @@
         android:paddingBottom="@dimen/listview_items_padding_gp_top"
         android:text="@string/notice"/>
 
+    <Switch
+        android:id="@+id/sw_mute"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/mute"
+        android:textColor="@color/textNormalColor"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="30dp"
@@ -41,7 +48,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/progress"/>
+            android:text="@string/progress"
+            android:textColor="@color/textNormalColor"/>
 
         <SeekBar
             android:id="@+id/seekbar_progress"
@@ -58,7 +66,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/volume"/>
+            android:text="@string/volume"
+            android:textColor="@color/textNormalColor"/>
 
         <SeekBar
             android:id="@+id/seekbar_volume"
@@ -67,22 +76,6 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/light"/>
-
-        <SeekBar
-            android:id="@+id/seekbar_light"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
 
 
 
