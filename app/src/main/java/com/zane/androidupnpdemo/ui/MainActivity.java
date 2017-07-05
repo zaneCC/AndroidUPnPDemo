@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.zane.androidupnpdemo.Intents;
@@ -35,14 +36,11 @@ import com.zane.androidupnpdemo.service.SystemService;
 import com.zane.androidupnpdemo.util.Utils;
 
 import org.fourthline.cling.model.meta.Device;
-import org.fourthline.cling.support.model.MediaInfo;
-import org.fourthline.cling.support.model.PositionInfo;
 import org.fourthline.cling.support.model.TransportState;
 
 import java.util.Collection;
-import java.util.concurrent.ExecutionException;
 
-public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, SeekBar.OnSeekBarChangeListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final int PLAY_ACTION = 0xa1;
@@ -59,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private ListView mDeviceList;
     private SwipeRefreshLayout mRefreshLayout;
     private TextView mTVSelected;
+    private SeekBar mSeekProgress;
+    private SeekBar mSeekVolume;
+    private SeekBar mSeekLight;
 
     private BroadcastReceiver mTransportStateBroadcastReceiver;
     private ArrayAdapter<ClingDevice> mDevicesAdapter;
@@ -121,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mContext = this;
 
         initView();
+        initListeners();
         bindServices();
         registerReceivers();
     }
@@ -135,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         filter.addAction(Intents.ACTION_CHANGE_DEVICE);
         filter.addAction(Intents.ACTION_SET_VOLUME);
         filter.addAction(Intents.ACTION_UPDATE_LAST_CHANGE);
-        registerReceiver(mTransportStateBroadcastReceiver,filter);
+        registerReceiver(mTransportStateBroadcastReceiver, filter);
     }
 
 
@@ -166,10 +168,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mDeviceList = (ListView) findViewById(R.id.lv_devices);
         mRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.srl_refresh);
         mTVSelected = (TextView) findViewById(R.id.tv_selected);
+        mSeekProgress = (SeekBar) findViewById(R.id.seekbar_progress);
+        mSeekVolume = (SeekBar) findViewById(R.id.seekbar_volume);
+        mSeekLight = (SeekBar) findViewById(R.id.seekbar_light);
 
         mDevicesAdapter = new DevicesAdapter(mContext);
         mDeviceList.setAdapter(mDevicesAdapter);
 
+        /** 这里为了模拟 seek 效果(假设视频时间为 15s)，拖住 seekbar 同步视频时间，
+         * 在实际中 使用的是片源的时间 */
+        mSeekProgress.setMax(15);
+    }
+
+    private void initListeners() {
         mRefreshLayout.setOnRefreshListener(this);
 
         mDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -213,6 +224,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 });
             }
         });
+
+        mSeekProgress.setOnSeekBarChangeListener(this);
     }
 
     @Override
@@ -298,20 +311,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
          * 通过判断状态 来决定 是继续播放 还是重新播放
          */
 
-        if (currentState.equals(TransportState.STOPPED)){
-            mClingPlayControl.playNew("http://mp4.res.hunantv.com/video/1155/79c71f27a58042b23776691d206d23bf.mp4",
-                    new ControlCallback() {
+        if (currentState.equals(TransportState.STOPPED)) {
+            mClingPlayControl.playNew("http://mp4.res.hunantv.com/video/1155/79c71f27a58042b23776691d206d23bf.mp4", new ControlCallback() {
 
-                        @Override
-                        public void success(IResponse response) {
-                            Log.e(TAG, "play success");
-                        }
+                @Override
+                public void success(IResponse response) {
+                    Log.e(TAG, "play success");
+                }
 
-                        @Override
-                        public void fail(IResponse response) {
-                            Log.e(TAG, "play fail");
-                        }
-                    });
+                @Override
+                public void fail(IResponse response) {
+                    Log.e(TAG, "play fail");
+                }
+            });
         } else {
             mClingPlayControl.play(new ControlCallback() {
                 @Override
@@ -349,6 +361,42 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }
         }
     };
+
+    /******************* start progress changed listener *************************/
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        Log.e(TAG, "Start Seek");
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        Log.e(TAG, "Stop Seek");
+        int id = seekBar.getId();
+        switch (id) {
+            case R.id.seekbar_progress:
+
+                int currentProgress = seekBar.getProgress() * 1000; // 转为秒
+
+                mClingPlayControl.seek(currentProgress, new ControlCallback() {
+                    @Override
+                    public void success(IResponse response) {
+                        Log.e(TAG, "seek success");
+                    }
+
+                    @Override
+                    public void fail(IResponse response) {
+                        Log.e(TAG, "seek fail");
+                    }
+                });
+                break;
+        }
+    }
+    /******************* end progress changed listener *************************/
 
     /**
      * 接收状态改变信息

@@ -116,6 +116,6 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
 
     @Override
     public void destroy() {
-
+        mUpnpService.onDestroy();
     }
 }

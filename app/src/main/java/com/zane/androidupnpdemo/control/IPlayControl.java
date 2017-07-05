@@ -34,7 +34,7 @@ public interface IPlayControl {
     /**
      * 视频 seek
      *
-     * @param pos   seek到的位置
+     * @param pos   seek到的位置(单位:毫秒)
      */
     void seek(int pos, ControlCallback callback);
 
