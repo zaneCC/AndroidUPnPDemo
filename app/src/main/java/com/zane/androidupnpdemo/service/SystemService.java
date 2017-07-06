@@ -58,16 +58,9 @@ public class SystemService extends Service {
     private int mDeviceVolume;
     private AVTransportSubscriptionCallback mAVTransportSubscriptionCallback;
 
-    //Jetty DMS Server
-//    private ExecutorService mThreadPool = Executors.newCachedThreadPool();
-//    private JettyResourceServer mJettyResourceServer;
-
     @Override
     public void onCreate() {
         super.onCreate();
-        //Start Local Server
-//        mJettyResourceServer = new JettyResourceServer();
-//        mThreadPool.execute(mJettyResourceServer);
     }
 
     @Override
@@ -75,9 +68,6 @@ public class SystemService extends Service {
         //End all subscriptions
         if (mAVTransportSubscriptionCallback != null)
             mAVTransportSubscriptionCallback.end();
-
-        //Stop Jetty
-//        mJettyResourceServer.stopIfRunning();
 
         super.onDestroy();
     }
@@ -107,7 +97,8 @@ public class SystemService extends Service {
             mAVTransportSubscriptionCallback.end();
         }
         //Init Subscriptions
-        mAVTransportSubscriptionCallback = new AVTransportSubscriptionCallback(mSelectedDevice.getDevice().findService(ClingUpnpServiceManager.AV_TRANSPORT_SERVICE));
+        mAVTransportSubscriptionCallback = new AVTransportSubscriptionCallback(
+                mSelectedDevice.getDevice().findService(ClingUpnpServiceManager.AV_TRANSPORT_SERVICE));
         controlPoint.execute(mAVTransportSubscriptionCallback);
 
         Intent intent = new Intent(Intents.ACTION_CHANGE_DEVICE);
@@ -122,6 +113,9 @@ public class SystemService extends Service {
         mDeviceVolume = currentVolume;
     }
 
+    /**
+     * 事件监听
+     */
     private class AVTransportSubscriptionCallback extends SubscriptionCallback {
 
         protected AVTransportSubscriptionCallback(org.fourthline.cling.model.meta.Service service) {
@@ -143,7 +137,8 @@ public class SystemService extends Service {
         }
 
         @Override
-        protected void eventReceived(GENASubscription subscription) {
+        protected void eventReceived(GENASubscription subscription) { // 这里进行 事件接收处理
+
             Map<String, StateVariableValue> values = subscription.getCurrentValues();
             if (values != null && values.containsKey("LastChange")) {
                 String lastChangeValue = values.get("LastChange").toString();
@@ -161,13 +156,20 @@ public class SystemService extends Service {
                 if (transportState != null) {
                     TransportState ts = transportState.getValue();
                     if (ts == TransportState.PLAYING) {
+                        Log.e(TAG, "PLAYING");
                         Intent intent = new Intent(Intents.ACTION_PLAYING);
                         sendBroadcast(intent);
                     } else if (ts == TransportState.PAUSED_PLAYBACK) {
+                        Log.e(TAG, "PAUSED_PLAYBACK");
                         Intent intent = new Intent(Intents.ACTION_PAUSED_PLAYBACK);
                         sendBroadcast(intent);
                     } else if (ts == TransportState.STOPPED) {
+                        Log.e(TAG, "STOPPED");
                         Intent intent = new Intent(Intents.ACTION_STOPPED);
+                        sendBroadcast(intent);
+                    } else if (ts == TransportState.TRANSITIONING){ // 转菊花状态
+                        Log.e(TAG, "TRANSITIONING");
+                        Intent intent = new Intent(Intents.ACTION_TRANSITIONING);
                         sendBroadcast(intent);
                     }
                 }

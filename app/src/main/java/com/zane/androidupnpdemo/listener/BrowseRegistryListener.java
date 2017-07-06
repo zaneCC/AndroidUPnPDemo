@@ -31,7 +31,8 @@ public class BrowseRegistryListener extends DefaultRegistryListener {
     /* Discovery performance optimization for very slow Android devices! */
     @Override
     public void remoteDeviceDiscoveryStarted(Registry registry, RemoteDevice device) {
-        deviceAdded(device);
+        // 在这里设备拥有服务 也木有 action。。
+//        deviceAdded(device);
     }
 
     @Override
@@ -61,16 +62,10 @@ public class BrowseRegistryListener extends DefaultRegistryListener {
         //        deviceRemoved(device); // 本地设备 已移除
     }
 
-    public void deviceAdded(Device device) {
+    private void deviceAdded(Device device) {
         Log.e(TAG, "deviceAdded");
         if (!device.getType().equals(ClingUpnpServiceManager.dmrDeviceType)) {
             Log.e(TAG, "deviceAdded called, but not match");
-            return;
-        }
-        // TODO: 17/7/4 这种方式有点 low , 能否在源头过滤???
-        Service service = ClingUtils.findAVTServiceByDevice(device);
-        if (Utils.isNull(service) || service.getActions().length == 0) {
-            Log.e(TAG, "service is not match");
             return;
         }
 

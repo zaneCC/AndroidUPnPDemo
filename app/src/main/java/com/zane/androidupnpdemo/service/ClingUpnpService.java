@@ -52,7 +52,7 @@ public class ClingUpnpService extends AndroidUpnpServiceImpl {
         return mLocalDevice;
     }
 
-    class FixedAndroidUpnpServiceConfiguration extends AndroidUpnpServiceConfiguration {
+    private class FixedAndroidUpnpServiceConfiguration extends AndroidUpnpServiceConfiguration {
         @Override
         public StreamServer createStreamServer(NetworkAddressFactory networkAddressFactory) {
             // Use Jetty, start/stop a new shared instance of JettyServletContainer

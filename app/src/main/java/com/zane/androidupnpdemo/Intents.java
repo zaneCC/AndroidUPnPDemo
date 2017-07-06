@@ -51,6 +51,11 @@ public class Intents {
     public static final String ACTION_STOPPED = INTENT_ACTION_PREFIX + "stopped";
 
     /**
+     * transitioning action for MediaPlayer
+     */
+    public static final String ACTION_TRANSITIONING = INTENT_ACTION_PREFIX + "transitioning";
+
+    /**
      * Change device action for MediaPlayer
      */
     public static final String ACTION_CHANGE_DEVICE = INTENT_ACTION_PREFIX + "change_device";

@@ -21,7 +21,9 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.zane.androidupnpdemo.Config;
 import com.zane.androidupnpdemo.Intents;
 import com.zane.androidupnpdemo.control.ClingPlayControl;
 import com.zane.androidupnpdemo.entity.ClingDeviceList;
@@ -45,16 +47,19 @@ import java.util.Collection;
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, SeekBar.OnSeekBarChangeListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    /** 连接设备状态: 播放状态 */
     public static final int PLAY_ACTION = 0xa1;
+    /** 连接设备状态: 暂停状态 */
     public static final int PAUSE_ACTION = 0xa2;
+    /** 连接设备状态: 停止状态 */
     public static final int STOP_ACTION = 0xa3;
-    public static final int GET_MEDIA_INFO_ACTION = 0xa4;
-    public static final int GET_POSITION_INFO_ACTION = 0xa5;
-    public static final int RESUME_SEEKBAR_ACTION = 0xa6;
-    public static final int GET_VOLUME_ACTION = 0xa7;
-    public static final int SET_VOLUME_ACTION = 0xa8;
+    /** 连接设备状态: 转菊花状态 */
+    public static final int TRANSITIONING_ACTION = 0xa4;
+    /** 投放失败 */
+    public static final int ERROR_ACTION = 0xa5;
 
     private Context mContext;
+    private Handler mHandler = new InnerHandler();
 
     private ListView mDeviceList;
     private SwipeRefreshLayout mRefreshLayout;
@@ -136,9 +141,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         filter.addAction(Intents.ACTION_PLAYING);
         filter.addAction(Intents.ACTION_PAUSED_PLAYBACK);
         filter.addAction(Intents.ACTION_STOPPED);
-        filter.addAction(Intents.ACTION_CHANGE_DEVICE);
-        filter.addAction(Intents.ACTION_SET_VOLUME);
-        filter.addAction(Intents.ACTION_UPDATE_LAST_CHANGE);
+        filter.addAction(Intents.ACTION_TRANSITIONING);
         registerReceiver(mTransportStateBroadcastReceiver, filter);
     }
 
@@ -155,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mHandler.removeCallbacksAndMessages(null);
         // Unbind UPnP service
         unbindService(mUpnpServiceConnection);
         // Unbind System service
@@ -336,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
          */
 
         if (currentState.equals(TransportState.STOPPED)) {
-            mClingPlayControl.playNew("http://mp4.res.hunantv.com/video/1155/79c71f27a58042b23776691d206d23bf.mp4", new ControlCallback() {
+            mClingPlayControl.playNew(Config.TEST_URL, new ControlCallback() {
 
                 @Override
                 public void success(IResponse response) {
@@ -346,6 +350,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 @Override
                 public void fail(IResponse response) {
                     Log.e(TAG, "play fail");
+                    mHandler.sendEmptyMessage(ERROR_ACTION);
                 }
             });
         } else {
@@ -358,33 +363,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 @Override
                 public void fail(IResponse response) {
                     Log.e(TAG, "play fail");
+                    mHandler.sendEmptyMessage(ERROR_ACTION);
                 }
             });
         }
-
-
     }
-
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case PLAY_ACTION:
-                    Log.i(TAG, "Execute PLAY_ACTION");
-                    mClingPlayControl.setCurrentState(TransportState.PLAYING);
-                    break;
-                case PAUSE_ACTION:
-                    Log.i(TAG, "Execute PAUSE_ACTION");
-                    mClingPlayControl.setCurrentState(TransportState.PAUSED_PLAYBACK);
-                    break;
-                case STOP_ACTION:
-                    Log.i(TAG, "Execute STOP_ACTION");
-                    mClingPlayControl.setCurrentState(TransportState.STOPPED);
-                    break;
-            }
-        }
-    };
 
     /******************* start progress changed listener *************************/
 
@@ -437,6 +420,36 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
     /******************* end progress changed listener *************************/
 
+    private final class InnerHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case PLAY_ACTION:
+                    Log.i(TAG, "Execute PLAY_ACTION");
+                    Toast.makeText(mContext, "正在投放", Toast.LENGTH_SHORT).show();
+                    mClingPlayControl.setCurrentState(TransportState.PLAYING);
+                    break;
+                case PAUSE_ACTION:
+                    Log.i(TAG, "Execute PAUSE_ACTION");
+                    mClingPlayControl.setCurrentState(TransportState.PAUSED_PLAYBACK);
+                    break;
+                case STOP_ACTION:
+                    Log.i(TAG, "Execute STOP_ACTION");
+                    mClingPlayControl.setCurrentState(TransportState.STOPPED);
+                    break;
+                case TRANSITIONING_ACTION:
+                    Log.i(TAG, "Execute TRANSITIONING_ACTION");
+                    Toast.makeText(mContext, "正在连接", Toast.LENGTH_SHORT).show();
+                    break;
+                case ERROR_ACTION:
+                    Log.e(TAG, "Execute ERROR_ACTION");
+                    Toast.makeText(mContext, "投放失败", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    }
+
     /**
      * 接收状态改变信息
      */
@@ -444,16 +457,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.e(TAG, "Receive playback intent:" + intent.getAction());
-            if (Intents.ACTION_PLAYING.equals(intent.getAction())) {
+            String action = intent.getAction();
+            Log.e(TAG, "Receive playback intent:" + action);
+            if (Intents.ACTION_PLAYING.equals(action)) {
                 mHandler.sendEmptyMessage(PLAY_ACTION);
 
-            } else if (Intents.ACTION_PAUSED_PLAYBACK.equals(intent.getAction())) {
+            } else if (Intents.ACTION_PAUSED_PLAYBACK.equals(action)) {
                 mHandler.sendEmptyMessage(PAUSE_ACTION);
 
-            } else if (Intents.ACTION_STOPPED.equals(intent.getAction())) {
+            } else if (Intents.ACTION_STOPPED.equals(action)) {
                 mHandler.sendEmptyMessage(STOP_ACTION);
 
+            } else if (Intents.ACTION_TRANSITIONING.equals(action)){
+                mHandler.sendEmptyMessage(TRANSITIONING_ACTION);
             }
         }
     }
