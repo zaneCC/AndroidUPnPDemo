@@ -8,9 +8,9 @@ import com.zane.androidupnpdemo.entity.IResponse;
  * 日期：17/7/4 10:56
  */
 
-public interface ControlCallback {
+public interface ControlCallback<T> {
 
-    void success(IResponse response);
+    void success(IResponse<T> response);
 
-    void fail(IResponse response);
+    void fail(IResponse<T> response);
 }
