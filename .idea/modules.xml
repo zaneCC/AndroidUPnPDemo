@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AndroidUPnPDemo.iml" filepath="$PROJECT_DIR$/AndroidUPnPDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/clinglibrary/clinglibrary.iml" filepath="$PROJECT_DIR$/clinglibrary/clinglibrary.iml" />
     </modules>
   </component>
 </project>
