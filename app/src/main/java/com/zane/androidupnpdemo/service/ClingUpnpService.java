@@ -38,11 +38,6 @@ public class ClingUpnpService extends AndroidUpnpServiceImpl {
         super.onDestroy();
     }
 
-//    @Override
-//    protected UpnpServiceConfiguration createConfiguration() {
-//        return new FixedAndroidUpnpServiceConfiguration();
-//    }
-
     @Override
     public IBinder onBind(Intent intent) {
         return binder;
@@ -51,23 +46,6 @@ public class ClingUpnpService extends AndroidUpnpServiceImpl {
     public LocalDevice getLocalDevice() {
         return mLocalDevice;
     }
-
-//    将 ActionCallback 放入 DefaultUpnpServiceConfiguration 中定义的线程池 ClingExecutor 执行，
-//    执行完毕回调 ActionCallback 中定义的 success 或 failure 函数。
-//    AndroidUpnpServiceConfiguration extends DefaultUpnpServiceConfiguration
-
-//    private class FixedAndroidUpnpServiceConfiguration extends AndroidUpnpServiceConfiguration {
-//        @Override
-//        public StreamServer createStreamServer(NetworkAddressFactory networkAddressFactory) {
-//            // Use Jetty, start/stop a new shared instance of JettyServletContainer
-//            return new AsyncServletStreamServerImpl(
-//                    new AsyncServletStreamServerConfigurationImpl(
-//                            AndroidJettyServletContainer.INSTANCE,
-//                            networkAddressFactory.getStreamListenPort()
-//                    )
-//            );
-//        }
-//    }
 
     public UpnpServiceConfiguration getConfiguration() {
         return upnpService.getConfiguration();

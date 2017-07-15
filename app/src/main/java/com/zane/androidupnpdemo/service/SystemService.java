@@ -25,6 +25,7 @@ import android.util.Log;
 import com.zane.androidupnpdemo.Intents;
 import com.zane.androidupnpdemo.entity.ClingDevice;
 import com.zane.androidupnpdemo.entity.IDevice;
+import com.zane.androidupnpdemo.service.callback.AVTransportSubscriptionCallback;
 import com.zane.androidupnpdemo.service.manager.ClingUpnpServiceManager;
 
 import org.fourthline.cling.controlpoint.ControlPoint;
@@ -113,94 +114,4 @@ public class SystemService extends Service {
         mDeviceVolume = currentVolume;
     }
 
-    /**
-     * 事件监听
-     */
-    private class AVTransportSubscriptionCallback extends SubscriptionCallback {
-
-        protected AVTransportSubscriptionCallback(org.fourthline.cling.model.meta.Service service) {
-            super(service);
-        }
-
-        @Override
-        protected void failed(GENASubscription subscription, UpnpResponse responseStatus, Exception exception, String defaultMsg) {
-            Log.e(TAG, "AVTransportSubscriptionCallback failed.");
-        }
-
-        @Override
-        protected void established(GENASubscription subscription) {
-        }
-
-        @Override
-        protected void ended(GENASubscription subscription, CancelReason reason, UpnpResponse responseStatus) {
-            Log.i(TAG, "AVTransportSubscriptionCallback ended.");
-        }
-
-        @Override
-        protected void eventReceived(GENASubscription subscription) { // 这里进行 事件接收处理
-
-            Map<String, StateVariableValue> values = subscription.getCurrentValues();
-            if (values != null && values.containsKey("LastChange")) {
-                String lastChangeValue = values.get("LastChange").toString();
-                Log.i(TAG, "LastChange:" + lastChangeValue);
-                LastChange lastChange;
-                try {
-                    lastChange = new LastChange(new AVTransportLastChangeParser(), lastChangeValue);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return;
-                }
-
-                //Parse TransportState value.
-                AVTransportVariable.TransportState transportState = lastChange.getEventedValue(0, AVTransportVariable.TransportState.class);
-                if (transportState != null) {
-                    TransportState ts = transportState.getValue();
-                    if (ts == TransportState.PLAYING) {
-                        Log.e(TAG, "PLAYING");
-                        Intent intent = new Intent(Intents.ACTION_PLAYING);
-                        sendBroadcast(intent);
-                    } else if (ts == TransportState.PAUSED_PLAYBACK) {
-                        Log.e(TAG, "PAUSED_PLAYBACK");
-                        Intent intent = new Intent(Intents.ACTION_PAUSED_PLAYBACK);
-                        sendBroadcast(intent);
-                    } else if (ts == TransportState.STOPPED) {
-                        Log.e(TAG, "STOPPED");
-                        Intent intent = new Intent(Intents.ACTION_STOPPED);
-                        sendBroadcast(intent);
-                    } else if (ts == TransportState.TRANSITIONING){ // 转菊花状态
-                        Log.e(TAG, "TRANSITIONING");
-                        Intent intent = new Intent(Intents.ACTION_TRANSITIONING);
-                        sendBroadcast(intent);
-                    }
-                }
-
-                //Parse CurrentTrackMetaData value.
-                EventedValueString currentTrackMetaData = lastChange.getEventedValue(0, AVTransportVariable.CurrentTrackMetaData.class);
-                if (currentTrackMetaData != null && currentTrackMetaData.getValue() != null) {
-                    DIDLParser didlParser = new DIDLParser();
-                    Intent lastChangeIntent;
-                    try {
-                        DIDLContent content = didlParser.parse(currentTrackMetaData.getValue());
-                        Item item = content.getItems().get(0);
-                        String creator = item.getCreator();
-                        String title = item.getTitle();
-
-                        lastChangeIntent = new Intent(Intents.ACTION_UPDATE_LAST_CHANGE);
-                        lastChangeIntent.putExtra("creator", creator);
-                        lastChangeIntent.putExtra("title", title);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Parse CurrentTrackMetaData error.");
-                        lastChangeIntent = null;
-                    }
-
-                    if (lastChangeIntent != null)
-                        sendBroadcast(lastChangeIntent);
-                }
-            }
-        }
-
-        @Override
-        protected void eventsMissed(GENASubscription subscription, int numberOfMissedEvents) {
-        }
-    }
 }

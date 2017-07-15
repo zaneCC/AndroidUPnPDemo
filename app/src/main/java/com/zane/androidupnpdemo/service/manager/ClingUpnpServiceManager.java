@@ -33,7 +33,7 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
     public static final ServiceType AV_TRANSPORT_SERVICE = new UDAServiceType("AVTransport");
     /** 控制服务 */
     public static final ServiceType RENDERING_CONTROL_SERVICE = new UDAServiceType("RenderingControl");
-    public static final DeviceType dmrDeviceType = new UDADeviceType("MediaRenderer");
+    public static final DeviceType DMR_DEVICE_TYPE = new UDADeviceType("MediaRenderer");
 
     private static ClingUpnpServiceManager INSTANCE = null;
     //Service
@@ -64,7 +64,7 @@ public class ClingUpnpServiceManager implements IClingUpnpServiceManager {
         if (Utils.isNull(mUpnpService))
             return null;
 
-        Collection<Device> devices = mUpnpService.getRegistry().getDevices(dmrDeviceType);
+        Collection<Device> devices = mUpnpService.getRegistry().getDevices(DMR_DEVICE_TYPE);
         if (ListUtils.isEmpty(devices)) {
             return null;
         }
