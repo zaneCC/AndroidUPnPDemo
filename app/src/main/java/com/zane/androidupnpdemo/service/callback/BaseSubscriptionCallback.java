@@ -1,4 +1,4 @@
-package com.mgtv.ui.play.dlan.service.callback;
+package com.zane.androidupnpdemo.service.callback;
 
 import android.content.Context;
 
@@ -9,8 +9,6 @@ import org.fourthline.cling.model.gena.CancelReason;
 import org.fourthline.cling.model.gena.GENASubscription;
 import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.meta.Service;
-
-import java.util.Map;
 
 /**
  * 说明：

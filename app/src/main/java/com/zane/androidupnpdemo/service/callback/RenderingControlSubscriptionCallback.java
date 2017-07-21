@@ -26,33 +26,21 @@ import java.util.Map;
  * 日期：17/7/18 18:54
  */
 
-public class RenderingControlSubscriptionCallback extends SubscriptionCallback {
+public class RenderingControlSubscriptionCallback extends BaseSubscriptionCallback {
 
     private static final String TAG = RenderingControlSubscriptionCallback.class.getSimpleName();
 
-    private Context mContext;
-
     public RenderingControlSubscriptionCallback(Service service, Context context) {
-        super(service);
-        mContext = context;
-    }
-
-    @Override
-    protected void failed(GENASubscription subscription, UpnpResponse responseStatus, Exception exception, String defaultMsg) {
-    }
-
-    @Override
-    protected void established(GENASubscription subscription) {
-    }
-
-    @Override
-    protected void ended(GENASubscription subscription, CancelReason reason, UpnpResponse responseStatus) {
+        super(service, context);
     }
 
     @Override
     protected void eventReceived(GENASubscription subscription) {
-        Map values = subscription.getCurrentValues();
+        Map<String, StateVariableValue> values = subscription.getCurrentValues();
         if (Utils.isNull(values)) {
+            return;
+        }
+        if (Utils.isNull(mContext)) {
             return;
         }
         if (!values.containsKey("LastChange")) {
@@ -63,18 +51,18 @@ public class RenderingControlSubscriptionCallback extends SubscriptionCallback {
         Log.i(TAG, "LastChange:" + lastChangeValue);
         LastChange lastChange;
         try {
-            lastChange = new LastChange(
-                    new RenderingControlLastChangeParser(),
-                    lastChangeValue);
+            lastChange = new LastChange(new RenderingControlLastChangeParser(), lastChangeValue);
             //获取音量 volume
             int volume = 0;
             if (lastChange.getEventedValue(0, RenderingControlVariable.Volume.class) != null) {
+
                 volume = lastChange.getEventedValue(0, RenderingControlVariable.Volume.class).getValue().getVolume();
 
                 Log.e(TAG, "onVolumeChange volume: " + volume);
                 Intent intent = new Intent(Intents.ACTION_VOLUME_CALLBACK);
                 intent.putExtra(Intents.EXTRA_VOLUME, volume);
                 mContext.sendBroadcast(intent);
+
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,7 +70,5 @@ public class RenderingControlSubscriptionCallback extends SubscriptionCallback {
 
     }
 
-    @Override
-    protected void eventsMissed(GENASubscription subscription, int numberOfMissedEvents) {
-    }
 }
+
