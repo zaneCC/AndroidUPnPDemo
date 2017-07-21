@@ -1,7 +1,8 @@
-package com.mgtv.ui.play.dlan.manager;
+package com.zane.androidupnpdemo.service.manager;
 
 
-import com.mgtv.ui.play.dlan.service.ClingUpnpService;
+
+import com.zane.androidupnpdemo.service.ClingUpnpService;
 
 import org.fourthline.cling.registry.Registry;
 

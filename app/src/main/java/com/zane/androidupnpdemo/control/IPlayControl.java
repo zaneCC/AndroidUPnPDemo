@@ -1,8 +1,10 @@
 package com.zane.androidupnpdemo.control;
 
+import android.os.Handler;
 import android.support.annotation.Nullable;
 
-import com.zane.androidupnpdemo.listener.ControlCallback;
+import com.zane.androidupnpdemo.control.callback.ControlCallback;
+import com.zane.androidupnpdemo.control.callback.ControlReceiveCallback;
 
 /**
  * 说明：对视频的控制操作定义
@@ -53,4 +55,14 @@ public interface IPlayControl {
      * @param desiredMute   是否静音
      */
     void setMute(boolean desiredMute, @Nullable ControlCallback callback);
+
+    /**
+     * 获取tv进度
+     */
+    void getPositionInfo(@Nullable ControlReceiveCallback callback);
+
+    /**
+     * 获取音量
+     */
+    void getVolume(@Nullable ControlReceiveCallback callback);
 }

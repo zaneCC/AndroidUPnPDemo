@@ -1,6 +1,7 @@
-package com.mgtv.ui.play.dlan.control.callback;
+package com.zane.androidupnpdemo.control.callback;
 
-import com.mgtv.ui.play.dlan.entity.IResponse;
+
+import com.zane.androidupnpdemo.entity.IResponse;
 
 /**
  * 说明：手机端接收投屏端信息回调

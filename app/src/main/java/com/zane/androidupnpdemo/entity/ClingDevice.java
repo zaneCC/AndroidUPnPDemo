@@ -10,14 +10,24 @@ import org.fourthline.cling.model.meta.Device;
 
 public class ClingDevice  implements IDevice<Device> {
 
-    private Device device;
+    private Device mDevice;
+    /** 是否已选中 */
+    private boolean isSelected;
 
     public ClingDevice(Device device) {
-        this.device = device;
+        this.mDevice = device;
     }
 
     @Override
     public Device getDevice() {
-        return device;
+        return mDevice;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
     }
 }

@@ -1,11 +1,12 @@
-package com.mgtv.ui.play.dlan.service.callback;
+package com.zane.androidupnpdemo.service.callback;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
-import com.hunantv.imgo.util.LogUtil;
-import com.mgtv.ui.play.dlan.Intents;
-import com.mgtv.ui.play.dlan.util.Utils;
+
+import com.zane.androidupnpdemo.Intents;
+import com.zane.androidupnpdemo.util.Utils;
 
 import org.fourthline.cling.controlpoint.SubscriptionCallback;
 import org.fourthline.cling.model.gena.CancelReason;
@@ -50,7 +51,7 @@ public class RenderingControlSubscriptionCallback extends SubscriptionCallback {
 
     @Override
     protected void eventReceived(GENASubscription subscription) {
-        Map<String, StateVariableValue> values = subscription.getCurrentValues();
+        Map values = subscription.getCurrentValues();
         if (Utils.isNull(values)) {
             return;
         }
@@ -59,7 +60,7 @@ public class RenderingControlSubscriptionCallback extends SubscriptionCallback {
         }
 
         String lastChangeValue = values.get("LastChange").toString();
-        LogUtil.i(TAG, "LastChange:" + lastChangeValue);
+        Log.i(TAG, "LastChange:" + lastChangeValue);
         LastChange lastChange;
         try {
             lastChange = new LastChange(
@@ -70,7 +71,7 @@ public class RenderingControlSubscriptionCallback extends SubscriptionCallback {
             if (lastChange.getEventedValue(0, RenderingControlVariable.Volume.class) != null) {
                 volume = lastChange.getEventedValue(0, RenderingControlVariable.Volume.class).getValue().getVolume();
 
-                LogUtil.e(TAG, "onVolumeChange volume: " + volume);
+                Log.e(TAG, "onVolumeChange volume: " + volume);
                 Intent intent = new Intent(Intents.ACTION_VOLUME_CALLBACK);
                 intent.putExtra(Intents.EXTRA_VOLUME, volume);
                 mContext.sendBroadcast(intent);

@@ -26,21 +26,22 @@ import android.widget.Toast;
 import com.zane.androidupnpdemo.Config;
 import com.zane.androidupnpdemo.Intents;
 import com.zane.androidupnpdemo.control.ClingPlayControl;
+import com.zane.androidupnpdemo.control.callback.ControlReceiveCallback;
 import com.zane.androidupnpdemo.entity.ClingDeviceList;
+import com.zane.androidupnpdemo.entity.DLANPlayState;
 import com.zane.androidupnpdemo.entity.IResponse;
 import com.zane.androidupnpdemo.listener.BrowseRegistryListener;
-import com.zane.androidupnpdemo.listener.ControlCallback;
+import com.zane.androidupnpdemo.control.callback.ControlCallback;
 import com.zane.androidupnpdemo.listener.DeviceListChangedListener;
-import com.zane.androidupnpdemo.service.manager.ClingUpnpServiceManager;
+import com.zane.androidupnpdemo.service.manager.ClingManager;
 import com.zane.androidupnpdemo.R;
 import com.zane.androidupnpdemo.entity.ClingDevice;
 import com.zane.androidupnpdemo.entity.IDevice;
 import com.zane.androidupnpdemo.service.ClingUpnpService;
-import com.zane.androidupnpdemo.service.SystemService;
+import com.zane.androidupnpdemo.service.manager.DeviceManager;
 import com.zane.androidupnpdemo.util.Utils;
 
 import org.fourthline.cling.model.meta.Device;
-import org.fourthline.cling.support.model.TransportState;
 
 import java.util.Collection;
 
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     public static final int STOP_ACTION = 0xa3;
     /** 连接设备状态: 转菊花状态 */
     public static final int TRANSITIONING_ACTION = 0xa4;
+    /** 获取进度 */
+    public static final int GET_POSITION_INFO_ACTION = 0xa5;
     /** 投放失败 */
     public static final int ERROR_ACTION = 0xa5;
 
@@ -86,8 +89,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             ClingUpnpService.LocalBinder binder = (ClingUpnpService.LocalBinder) service;
             ClingUpnpService beyondUpnpService = binder.getService();
 
-            ClingUpnpServiceManager clingUpnpServiceManager = ClingUpnpServiceManager.getInstance();
+            ClingManager clingUpnpServiceManager = ClingManager.getInstance();
             clingUpnpServiceManager.setUpnpService(beyondUpnpService);
+            clingUpnpServiceManager.setDeviceManager(new DeviceManager());
 
             clingUpnpServiceManager.getRegistry().addListener(mBrowseRegistryListener);
             //Search on service created.
@@ -98,28 +102,28 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         public void onServiceDisconnected(ComponentName className) {
             Log.e(TAG, "mUpnpServiceConnection onServiceDisconnected");
 
-            ClingUpnpServiceManager.getInstance().setUpnpService(null);
+            ClingManager.getInstance().setUpnpService(null);
         }
     };
 
-    private ServiceConnection mSystemServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            Log.e(TAG, "mSystemServiceConnection onServiceConnected");
-
-            SystemService.LocalBinder systemServiceBinder = (SystemService.LocalBinder) service;
-            //Set binder to SystemManager
-            ClingUpnpServiceManager clingUpnpServiceManager = ClingUpnpServiceManager.getInstance();
-            clingUpnpServiceManager.setSystemService(systemServiceBinder.getService());
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName className) {
-            Log.e(TAG, "mSystemServiceConnection onServiceDisconnected");
-
-            ClingUpnpServiceManager.getInstance().setSystemService(null);
-        }
-    };
+    //    private ServiceConnection mSystemServiceConnection = new ServiceConnection() {
+    //        @Override
+    //        public void onServiceConnected(ComponentName className, IBinder service) {
+    //            Log.e(TAG, "mSystemServiceConnection onServiceConnected");
+    //
+    //            SystemService.LocalBinder systemServiceBinder = (SystemService.LocalBinder) service;
+    //            //Set binder to SystemManager
+    //            ClingManager clingUpnpServiceManager = ClingManager.getInstance();
+    ////            clingUpnpServiceManager.setSystemService(systemServiceBinder.getService());
+    //        }
+    //
+    //        @Override
+    //        public void onServiceDisconnected(ComponentName className) {
+    //            Log.e(TAG, "mSystemServiceConnection onServiceDisconnected");
+    //
+    //            ClingUpnpServiceManager.getInstance().setSystemService(null);
+    //        }
+    //    };
 
 
     @Override
@@ -151,8 +155,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         Intent upnpServiceIntent = new Intent(MainActivity.this, ClingUpnpService.class);
         bindService(upnpServiceIntent, mUpnpServiceConnection, Context.BIND_AUTO_CREATE);
         // Bind System service
-        Intent systemServiceIntent = new Intent(MainActivity.this, SystemService.class);
-        bindService(systemServiceIntent, mSystemServiceConnection, Context.BIND_AUTO_CREATE);
+        //        Intent systemServiceIntent = new Intent(MainActivity.this, SystemService.class);
+        //        bindService(systemServiceIntent, mSystemServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -162,11 +166,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         // Unbind UPnP service
         unbindService(mUpnpServiceConnection);
         // Unbind System service
-        unbindService(mSystemServiceConnection);
+        //        unbindService(mSystemServiceConnection);
         // UnRegister Receiver
         unregisterReceiver(mTransportStateBroadcastReceiver);
 
-        ClingUpnpServiceManager.getInstance().destroy();
+        ClingManager.getInstance().destroy();
         ClingDeviceList.getInstance().destroy();
     }
 
@@ -201,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     return;
                 }
 
-                ClingUpnpServiceManager.getInstance().setSelectedDevice(item);
+                ClingManager.getInstance().setSelectedDevice(item);
 
                 Device device = item.getDevice();
                 if (Utils.isNull(device)) {
@@ -270,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
      * 刷新设备
      */
     private void refreshDeviceList() {
-        Collection<ClingDevice> devices = ClingUpnpServiceManager.getInstance().getDmrDevices();
+        Collection<ClingDevice> devices = ClingManager.getInstance().getDmrDevices();
         ClingDeviceList.getInstance().setClingDeviceList(devices);
         if (devices != null) {
             mDevicesAdapter.clear();
@@ -329,22 +333,46 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         });
     }
 
+    public void getPositionInfo() {
+        mClingPlayControl.getPositionInfo(new ControlReceiveCallback() {
+            @Override
+            public void receive(IResponse response) {
+
+            }
+
+            @Override
+            public void success(IResponse response) {
+
+            }
+
+            @Override
+            public void fail(IResponse response) {
+
+            }
+        });
+    }
+
     /**
      * 播放视频
      */
     private void play() {
-        TransportState currentState = mClingPlayControl.getCurrentState();
+        @DLANPlayState.DLANPlayStates int currentState = mClingPlayControl.getCurrentState();
 
         /**
          * 通过判断状态 来决定 是继续播放 还是重新播放
          */
 
-        if (currentState.equals(TransportState.STOPPED)) {
+        if (currentState == DLANPlayState.STOP) {
             mClingPlayControl.playNew(Config.TEST_URL, new ControlCallback() {
 
                 @Override
                 public void success(IResponse response) {
                     Log.e(TAG, "play success");
+                    //                    ClingUpnpServiceManager.getInstance().subscribeMediaRender();
+                    //                    getPositionInfo();
+                    // TODO: 17/7/21 play success
+                    ClingManager.getInstance().registerAVTransport(mContext);
+                    ClingManager.getInstance().registerRenderingControl(mContext);
                 }
 
                 @Override
@@ -387,7 +415,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         switch (id) {
             case R.id.seekbar_progress: // 进度
 
-                int currentProgress = seekBar.getProgress() * 1000; // 转为秒
+                int currentProgress = seekBar.getProgress() * 1000; // 转为毫秒
                 mClingPlayControl.seek(currentProgress, new ControlCallback() {
                     @Override
                     public void success(IResponse response) {
@@ -418,6 +446,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 break;
         }
     }
+
     /******************* end progress changed listener *************************/
 
     private final class InnerHandler extends Handler {
@@ -428,15 +457,18 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 case PLAY_ACTION:
                     Log.i(TAG, "Execute PLAY_ACTION");
                     Toast.makeText(mContext, "正在投放", Toast.LENGTH_SHORT).show();
-                    mClingPlayControl.setCurrentState(TransportState.PLAYING);
+                    mClingPlayControl.setCurrentState(DLANPlayState.PLAY);
+
                     break;
                 case PAUSE_ACTION:
                     Log.i(TAG, "Execute PAUSE_ACTION");
-                    mClingPlayControl.setCurrentState(TransportState.PAUSED_PLAYBACK);
+                    mClingPlayControl.setCurrentState(DLANPlayState.PAUSE);
+
                     break;
                 case STOP_ACTION:
                     Log.i(TAG, "Execute STOP_ACTION");
-                    mClingPlayControl.setCurrentState(TransportState.STOPPED);
+                    mClingPlayControl.setCurrentState(DLANPlayState.STOP);
+
                     break;
                 case TRANSITIONING_ACTION:
                     Log.i(TAG, "Execute TRANSITIONING_ACTION");
@@ -468,7 +500,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             } else if (Intents.ACTION_STOPPED.equals(action)) {
                 mHandler.sendEmptyMessage(STOP_ACTION);
 
-            } else if (Intents.ACTION_TRANSITIONING.equals(action)){
+            } else if (Intents.ACTION_TRANSITIONING.equals(action)) {
                 mHandler.sendEmptyMessage(TRANSITIONING_ACTION);
             }
         }

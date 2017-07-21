@@ -66,6 +66,31 @@ public class Intents {
     public static final String ACTION_SET_VOLUME = INTENT_ACTION_PREFIX + "set_volume";
 
     /**
+     * 主动获取播放进度
+     */
+    public static final String ACTION_GET_POSITION = INTENT_ACTION_PREFIX + "get_position";
+    /**
+     * 远程设备回传播放进度
+     */
+    public static final String ACTION_POSITION_CALLBACK = INTENT_ACTION_PREFIX + "position_callback";
+    /**
+     * 音量回传
+     */
+    public static final String ACTION_VOLUME_CALLBACK = INTENT_ACTION_PREFIX + "volume_callback";
+    /**
+     * 播放进度回传值
+     */
+    public static final String EXTRA_POSITION = INTENT_ACTION_PREFIX + "extra_position";
+    /**
+     * 音量回传值
+     */
+    public static final String EXTRA_VOLUME = INTENT_ACTION_PREFIX + "extra_volume";
+    /**
+     * 投屏端播放完成
+     */
+    public static final String ACTION_PLAY_COMPLETE = INTENT_ACTION_PREFIX + "play_complete";
+
+    /**
      * Update the lastChange value action for MediaPlayer
      */
     public static final String ACTION_UPDATE_LAST_CHANGE = INTENT_ACTION_PREFIX + "update_last_change";

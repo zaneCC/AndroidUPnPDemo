@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.zane.androidupnpdemo.entity.IControlPoint;
 import com.zane.androidupnpdemo.entity.IDevice;
-import com.zane.androidupnpdemo.service.manager.ClingUpnpServiceManager;
+import com.zane.androidupnpdemo.service.manager.ClingManager;
 
 import org.fourthline.cling.controlpoint.ControlPoint;
 import org.fourthline.cling.model.meta.Device;
@@ -28,7 +28,7 @@ public class ClingUtils {
      */
     @Nullable
     public static Service findServiceFromSelectedDevice(ServiceType serviceType) {
-        IDevice selectedDevice = ClingUpnpServiceManager.getInstance().getSelectedDevice();
+        IDevice selectedDevice = ClingManager.getInstance().getSelectedDevice();
         if (Utils.isNull(selectedDevice)) {
             return null;
         }
@@ -45,7 +45,7 @@ public class ClingUtils {
      */
     @Nullable
     public static Service findAVTServiceByDevice(Device device) {
-        return device.findService(ClingUpnpServiceManager.AV_TRANSPORT_SERVICE);
+        return device.findService(ClingManager.AV_TRANSPORT_SERVICE);
     }
 
     /**
@@ -55,7 +55,7 @@ public class ClingUtils {
      */
     @Nullable
     public static ControlPoint getControlPoint() {
-        IControlPoint controlPoint = ClingUpnpServiceManager.getInstance().getControlPoint();
+        IControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
         if (Utils.isNull(controlPoint)) {
             return null;
         }

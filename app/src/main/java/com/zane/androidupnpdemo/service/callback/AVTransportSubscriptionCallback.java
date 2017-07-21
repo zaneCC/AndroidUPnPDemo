@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.zane.androidupnpdemo.Intents;
+import com.zane.androidupnpdemo.util.Utils;
 
 import org.fourthline.cling.controlpoint.SubscriptionCallback;
 import org.fourthline.cling.model.gena.CancelReason;
@@ -33,9 +34,9 @@ public class AVTransportSubscriptionCallback  extends SubscriptionCallback {
     private static final String TAG = AVTransportSubscriptionCallback.class.getSimpleName();
     private Context mContext;
 
-    protected AVTransportSubscriptionCallback(org.fourthline.cling.model.meta.Service service,
+    public AVTransportSubscriptionCallback(org.fourthline.cling.model.meta.Service service,
                                               Context context) {
-        super(service);
+        super(service, 3);
         mContext = context;
     }
 
@@ -89,6 +90,15 @@ public class AVTransportSubscriptionCallback  extends SubscriptionCallback {
                     Intent intent = new Intent(Intents.ACTION_TRANSITIONING);
                     mContext.sendBroadcast(intent);
                 }
+            }
+
+            //RelativeTimePosition
+            String position = "00:00:00";
+            AVTransportVariable.RelativeTimePosition eventedValue = lastChange.getEventedValue(0, AVTransportVariable.RelativeTimePosition.class);
+            if (Utils.isNotNull(eventedValue)) {
+                position = lastChange.getEventedValue(0, AVTransportVariable.RelativeTimePosition.class).getValue();
+
+                Log.e(TAG, "position: " + position);
             }
 
             //Parse CurrentTrackMetaData value.

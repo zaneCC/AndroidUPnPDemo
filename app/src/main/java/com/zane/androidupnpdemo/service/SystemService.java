@@ -26,27 +26,9 @@ import com.zane.androidupnpdemo.Intents;
 import com.zane.androidupnpdemo.entity.ClingDevice;
 import com.zane.androidupnpdemo.entity.IDevice;
 import com.zane.androidupnpdemo.service.callback.AVTransportSubscriptionCallback;
-import com.zane.androidupnpdemo.service.manager.ClingUpnpServiceManager;
+import com.zane.androidupnpdemo.service.manager.ClingManager;
 
 import org.fourthline.cling.controlpoint.ControlPoint;
-import org.fourthline.cling.controlpoint.SubscriptionCallback;
-import org.fourthline.cling.model.gena.CancelReason;
-import org.fourthline.cling.model.gena.GENASubscription;
-import org.fourthline.cling.model.message.UpnpResponse;
-import org.fourthline.cling.model.meta.Device;
-import org.fourthline.cling.model.state.StateVariableValue;
-import org.fourthline.cling.support.avtransport.lastchange.AVTransportLastChangeParser;
-import org.fourthline.cling.support.avtransport.lastchange.AVTransportVariable;
-import org.fourthline.cling.support.contentdirectory.DIDLParser;
-import org.fourthline.cling.support.lastchange.EventedValueString;
-import org.fourthline.cling.support.lastchange.LastChange;
-import org.fourthline.cling.support.model.DIDLContent;
-import org.fourthline.cling.support.model.TransportState;
-import org.fourthline.cling.support.model.item.Item;
-
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Application service，process background task.
@@ -67,7 +49,7 @@ public class SystemService extends Service {
     @Override
     public void onDestroy() {
         //End all subscriptions
-        if (mAVTransportSubscriptionCallback != null)
+        if (mAVTransportSubscriptionCallback != null)mAVTransportSubscriptionCallback.run();
             mAVTransportSubscriptionCallback.end();
 
         super.onDestroy();
@@ -99,11 +81,18 @@ public class SystemService extends Service {
         }
         //Init Subscriptions
         mAVTransportSubscriptionCallback = new AVTransportSubscriptionCallback(
-                mSelectedDevice.getDevice().findService(ClingUpnpServiceManager.AV_TRANSPORT_SERVICE));
+                mSelectedDevice.getDevice().findService(ClingManager.AV_TRANSPORT_SERVICE), this);
         controlPoint.execute(mAVTransportSubscriptionCallback);
 
         Intent intent = new Intent(Intents.ACTION_CHANGE_DEVICE);
         sendBroadcast(intent);
+    }
+
+    public void subscribeMediaRender(ControlPoint controlPoint){
+        //Init Subscriptions
+//        mAVTransportSubscriptionCallback = new AVTransportSubscriptionCallback(
+//                mSelectedDevice.getDevice().findService(ClingUpnpServiceManager.AV_TRANSPORT_SERVICE), this);
+//        controlPoint.execute(mAVTransportSubscriptionCallback);
     }
 
     public int getDeviceVolume() {

@@ -1,4 +1,4 @@
-package com.mgtv.ui.play.dlan.entity;
+package com.zane.androidupnpdemo.entity;
 
 import org.fourthline.cling.model.action.ActionInvocation;
 import org.fourthline.cling.model.message.UpnpResponse;

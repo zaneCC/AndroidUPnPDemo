@@ -1,8 +1,9 @@
-package com.mgtv.ui.play.dlan.control;
+package com.zane.androidupnpdemo.control;
 
 import android.content.Context;
 
-import com.mgtv.ui.play.dlan.entity.IDevice;
+import com.zane.androidupnpdemo.entity.IDevice;
+
 
 /**
  * 说明：tv端回调

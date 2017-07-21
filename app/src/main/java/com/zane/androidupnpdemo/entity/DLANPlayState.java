@@ -1,4 +1,4 @@
-package com.mgtv.ui.play.dlan.entity;
+package com.zane.androidupnpdemo.entity;
 
 import android.support.annotation.IntDef;
 

@@ -2,15 +2,17 @@ package com.zane.androidupnpdemo.service.manager;
 
 
 import android.content.Context;
+import android.util.Log;
 
-import com.hunantv.imgo.util.LogUtil;
-import com.mgtv.ui.play.dlan.Config;
-import com.mgtv.ui.play.dlan.control.SubscriptionControl;
-import com.mgtv.ui.play.dlan.entity.ClingDevice;
-import com.mgtv.ui.play.dlan.entity.ClingDeviceList;
-import com.mgtv.ui.play.dlan.entity.IDevice;
-import com.mgtv.ui.play.dlan.util.Utils;
 
+import com.zane.androidupnpdemo.Config;
+import com.zane.androidupnpdemo.control.SubscriptionControl;
+import com.zane.androidupnpdemo.entity.ClingDevice;
+import com.zane.androidupnpdemo.entity.ClingDeviceList;
+import com.zane.androidupnpdemo.entity.IDevice;
+import com.zane.androidupnpdemo.util.Utils;
+
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -43,11 +45,11 @@ public class DeviceManager implements IDeviceManager {
 //            sendBroadcast(intent);
 //        }
 
-        LogUtil.i(TAG, "Change selected device.");
+        Log.i(TAG, "Change selected device.");
         mSelectedDevice = (ClingDevice) selectedDevice;
 
         // 重置选中状态
-        List<ClingDevice> clingDeviceList = ClingDeviceList.getInstance().getClingDeviceList();
+        Collection<ClingDevice> clingDeviceList = ClingDeviceList.getInstance().getClingDeviceList();
         if (Utils.isNotNull(clingDeviceList)){
             for (ClingDevice device : clingDeviceList){
                 device.setSelected(false);

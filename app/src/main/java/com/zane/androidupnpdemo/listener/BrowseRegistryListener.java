@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.zane.androidupnpdemo.entity.ClingDevice;
 import com.zane.androidupnpdemo.entity.ClingDeviceList;
-import com.zane.androidupnpdemo.service.manager.ClingUpnpServiceManager;
+import com.zane.androidupnpdemo.service.manager.ClingManager;
 import com.zane.androidupnpdemo.util.Utils;
 
 import org.fourthline.cling.model.meta.Device;
@@ -62,7 +62,7 @@ public class BrowseRegistryListener extends DefaultRegistryListener {
 
     private void deviceAdded(Device device) {
         Log.e(TAG, "deviceAdded");
-        if (!device.getType().equals(ClingUpnpServiceManager.DMR_DEVICE_TYPE)) {
+        if (!device.getType().equals(ClingManager.DMR_DEVICE_TYPE)) {
             Log.e(TAG, "deviceAdded called, but not match");
             return;
         }

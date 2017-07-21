@@ -1,14 +1,14 @@
-package com.mgtv.ui.play.dlan.control;
+package com.zane.androidupnpdemo.control;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.mgtv.ui.play.dlan.entity.IDevice;
-import com.mgtv.ui.play.dlan.manager.ClingManager;
-import com.mgtv.ui.play.dlan.service.callback.AVTransportSubscriptionCallback;
-import com.mgtv.ui.play.dlan.service.callback.RenderingControlSubscriptionCallback;
-import com.mgtv.ui.play.dlan.util.ClingUtils;
-import com.mgtv.ui.play.dlan.util.Utils;
+import com.zane.androidupnpdemo.entity.IDevice;
+import com.zane.androidupnpdemo.service.callback.AVTransportSubscriptionCallback;
+import com.zane.androidupnpdemo.service.callback.RenderingControlSubscriptionCallback;
+import com.zane.androidupnpdemo.service.manager.ClingManager;
+import com.zane.androidupnpdemo.util.ClingUtils;
+import com.zane.androidupnpdemo.util.Utils;
 
 import org.fourthline.cling.controlpoint.ControlPoint;
 import org.fourthline.cling.model.meta.Device;

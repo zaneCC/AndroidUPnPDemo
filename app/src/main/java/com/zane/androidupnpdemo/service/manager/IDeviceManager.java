@@ -1,8 +1,9 @@
-package com.mgtv.ui.play.dlan.manager;
+package com.zane.androidupnpdemo.service.manager;
 
 import android.content.Context;
 
-import com.mgtv.ui.play.dlan.entity.IDevice;
+import com.zane.androidupnpdemo.entity.IDevice;
+
 
 /**
  * 说明：

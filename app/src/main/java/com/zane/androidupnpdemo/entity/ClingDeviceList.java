@@ -8,6 +8,7 @@ import org.fourthline.cling.model.meta.Device;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * 说明：单例设备列表, 保证全局只有一个设备列表
@@ -19,6 +20,9 @@ public class ClingDeviceList {
 
     private static ClingDeviceList INSTANCE = null;
 
+    /**
+     * 投屏设备列表 都是引用该 list
+     */
     private Collection<ClingDevice> mClingDeviceList;
 
     private ClingDeviceList(){
@@ -61,7 +65,8 @@ public class ClingDeviceList {
         return false;
     }
 
-    public Collection<ClingDevice> getClingDeviceList() {
+    @Nullable
+    public Collection<ClingDevice> getClingDeviceList(){
         return mClingDeviceList;
     }
 
