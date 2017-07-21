@@ -1,8 +1,7 @@
 package com.zane.androidupnpdemo.service.callback;
 
 import android.content.Context;
-
-import com.hunantv.imgo.util.LogUtil;
+import android.util.Log;
 
 import org.fourthline.cling.controlpoint.SubscriptionCallback;
 import org.fourthline.cling.model.gena.CancelReason;
@@ -29,7 +28,7 @@ public abstract class BaseSubscriptionCallback extends SubscriptionCallback {
 
     @Override
     protected void failed(GENASubscription subscription, UpnpResponse responseStatus, Exception exception, String defaultMsg) {
-        LogUtil.e(TAG, "AVTransportSubscriptionCallback failed.");
+        Log.e(TAG, "AVTransportSubscriptionCallback failed.");
     }
 
     @Override
@@ -43,6 +42,6 @@ public abstract class BaseSubscriptionCallback extends SubscriptionCallback {
     @Override
     protected void ended(GENASubscription subscription, CancelReason reason, UpnpResponse responseStatus) {
         mContext = null;
-        LogUtil.e(TAG, "ended");
+        Log.e(TAG, "ended");
     }
 }

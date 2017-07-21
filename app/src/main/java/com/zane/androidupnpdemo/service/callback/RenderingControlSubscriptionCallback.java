@@ -4,14 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-
 import com.zane.androidupnpdemo.Intents;
 import com.zane.androidupnpdemo.util.Utils;
 
-import org.fourthline.cling.controlpoint.SubscriptionCallback;
-import org.fourthline.cling.model.gena.CancelReason;
 import org.fourthline.cling.model.gena.GENASubscription;
-import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.meta.Service;
 import org.fourthline.cling.model.state.StateVariableValue;
 import org.fourthline.cling.support.lastchange.LastChange;
