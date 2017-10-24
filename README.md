@@ -26,7 +26,7 @@
 三、手机与tv通信
 
 - [android投屏技术:控制设备代码实现](http://www.jianshu.com/p/d0dcfdd0cd6e)
-- android投屏技术:控制设备源码分析(未完结)
+- [android投屏技术:控制设备源码分析](http://www.jianshu.com/p/4452182d2b48)
 
 
 #### 2017/7/5 更新：已有功能
