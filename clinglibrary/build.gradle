@@ -28,4 +28,9 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
+    compile 'org.seamless:seamless-util:1.1.1'
+    compile 'org.seamless:seamless-http:1.1.1'
+    compile 'org.seamless:seamless-xml:1.1.1'
+    compile 'javax.enterprise:cdi-api:1.2'
+    compile 'javax.annotation:javax.annotation-api:1.2'
 }
